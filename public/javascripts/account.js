@@ -6,7 +6,7 @@ function ShowAcct(){
   $('#main').hide();
 }
 
-
+//------------------------------------------------------------------------------
 function sendReqForAccountInfo() {
   $.ajax({
     url: '/users/account',
@@ -29,9 +29,11 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
       device.deviceId + ", APIKEY: " + device.apikey + 
       " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
       " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +
+      " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn'>Remove Device</button> " +
       " </li>");
     $("#ping-"+device.deviceId).click({deviceId: device.deviceId},pingDevice);
     $("#activity-"+device.deviceId).click({deviceId: device.deviceId},populateDeviceActivity);
+    $("#remove-"+device.deviceId).click({deviceId: device.deviceId},removeDevice);
   }
 }
 
@@ -47,6 +49,8 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
     $("#error").show();
   } 
 }
+
+//------------------------------------------------------------------------------
 
 // Registers the specified device with the server.
 function registerDevice() {
@@ -113,6 +117,11 @@ function populateDeviceActivity(event){
   })
 }
 
+function removeDevice(e){
+  console.log(e.data.deviceId);
+}
+
+//------------------------------------------------------------------------------
 function showEditAccount() {
   $("#fullNameEdit").val("");
   $("#editAccountButton").hide();
@@ -123,6 +132,7 @@ function hideEditAccount() {
   $("#editAccountButton").show();
   $("#editAccountInfo").slideUp();
 }
+//------------------------------------------------------------------------------
 
 // Show add device form and hide the add device button (really a link)
 function showAddDeviceForm() {
@@ -137,7 +147,7 @@ function hideAddDeviceForm() {
   $("#addDeviceForm").slideUp();  // Show the add device form
   $("#error").hide();
 }
-
+//------------------------------------------------------------------------------
 function sendUpdateRequest() {
   $.ajax({
     url: '/users/account',
@@ -148,6 +158,8 @@ function sendUpdateRequest() {
     .done(accountInfoOnlySuccess)
     .fail(accountInfoError);
 }
+
+//------------------------------------------------------------------------------
 
 // If the old password is correct, continue the update process
 function validateSuccess(data, textSatus, jqXHR) {
@@ -262,6 +274,8 @@ function accountInfoOnlySuccess(data, textSatus, jqXHR) {
     .done(validateSuccess)
     .fail(validateError);
 }
+
+//------------------------------------------------------------------------------
 
 // Handle authentication on page load
 $(function() {
