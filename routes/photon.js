@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
@@ -65,6 +66,15 @@ router.post('/pulse', function(req, res, next) {
             return res.status(201).send(JSON.stringify(responseJson));
         }
     });
+});
+
+router.get('/threshold', (req,res)=>{
+    console.log("deviceId of requesting thresh: "+req.query.coreid);
+    User.findOne({ userDevices: req.query.coreid }, (err, user)=>{
+        if(user !== null){
+            return res.status(200).send(JSON.stringify(user.uvThreshold));
+        }
+    })
 });
 
 module.exports = router;

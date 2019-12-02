@@ -3,7 +3,7 @@ let router = express.Router();
 let fs = require('fs');
 let jwt = require("jwt-simple");
 let Device = require("../models/device");
-let Pothole = require("../models/pothole");
+//let Pothole = require("../models/pothole");
 let User = require("../models/users");
 
 // Secret key for JWT
