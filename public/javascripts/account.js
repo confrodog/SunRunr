@@ -67,13 +67,13 @@ function registerDevice() {
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
          " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
-         " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn'>Remove Device</button> " +
+         " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Remove Device</button> " +
          /* " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
          "</li>");
       //  $("#ping-"+$("#deviceId").val()).click(function(event) {
       //    pingDevice(event, device.deviceId);
       //  });
-      $("#remove-"+device.deviceId).click({deviceId: device.deviceId},removeDevice);
+      $("#remove-"+$("#deviceId").val()).click({deviceId: $("#deviceId").val()},removeDevice);
        hideAddDeviceForm();
      })
      .fail(function(jqXHR, textStatus, errorThrown) {
