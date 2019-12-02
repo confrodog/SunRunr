@@ -29,6 +29,11 @@ $(document).ready(function(){
           cnt = 1;
         }
       }
+      fcast.month = d.getMonth();
+      fcast.day = d.getDate();
+      fcast.year = d.getFullYear();
+      fcast.temp = temp / cnt;
+      allfc.push(fcast);
       for(i in allfc){
         $('#fc_' + i).find('.fcdate').html(months[allfc[i].month] + " " + allfc[i].day + ", " + allfc[i].year);
         $('#fc_' + i).find('.fctemp').html(allfc[i].temp.toFixed(2) + '&#8457;');
