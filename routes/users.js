@@ -32,6 +32,50 @@ router.post('/signin', function(req, res, next) {
     });
 });
 
+// Update the name/password for a user (I tried making a PUT but it didn't work?)
+router.put('/update', function(req, res, next) {
+    let password = req.body.password;
+    let email = req.body.email;
+    let fullName = req.body.fullName;
+    
+    // If no password or full name given, update nothing
+    if (!password && !fullName) {
+        res.status(201).json({ success: true, message: "Nothing has been updated!"});
+        return;
+    }
+    // If no full name given, update the password
+    if (!fullName) {
+        bcrypt.hash(password, 10, function(err, hash) {
+            if (err) {
+                res.status(400).json({success: false, message: err.errmsg});
+            } else {
+                User.findOneAndUpdate({ email: email }, 
+                    { passwordHash: hash }, 
+                    function(err, user) {
+                        if (err) {res.status(400).json({success:false, message: err.errmsg});}
+                        else {
+                           console.log(user.fullName + "'s password has been updated");
+                           res.status(201).json({ success: true, message: "Password has been updated." });
+                        }
+                    });
+            }
+        });
+        return;
+    }
+    // If no password given, update the name
+    if (!password) {
+        User.findOneAndUpdate({ email: email} ,
+            { fullName: fullName},
+            function(err, user) {
+                if (err) {res.status(400).json({success:false, message: err.errmsg});}
+                    else {
+                        console.log(user.fullName + "'s name has been updated");
+                        res.status(201).json({ success: true, message: "Name has been updated." });
+                    }
+            });
+    }
+});
+
 /* Register a new user */
 router.post('/register', function(req, res, next) {
 

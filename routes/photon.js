@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
@@ -15,21 +16,8 @@ router.post('/pulse', function(req, res, next) {
         responseJson.message = "Request missing activities parameter.";
         return res.status(201).send(JSON.stringify(responseJson));
     }
+    req.body.activity.pop();
     console.log(req.body);
-    // for (let a of JSON.parse(req.body.activities)) {
-    //     console.log(a);
-    // }
-    /*
-    { 
-        "k": "bnpCaZYBifkRGX38IPLN7pvfPKO1iMs3",
-        "a": [ 
-            {"n": "0.000000", "t": "0.000000", "s": "0.000000", "u": "65535.000000"} 
-        ] 
-    }
-    */
-    // responseJson.status = "GOOD";
-    // responseJson.message = "activity recieved";
-    // return res.status(201).send(JSON.stringify(responseJson));
     // // Ensure the POST data include properties id and email
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
@@ -54,10 +42,9 @@ router.post('/pulse', function(req, res, next) {
                 // Create a new hw data with user email time stamp 
                 var activity = new Activity({
                     deviceId: req.body.deviceId,
-                    lon: req.body.longitude,
-                    lat: req.body.latitude,
-                    uv: req.body.uv,
-                    speed: req.body.GPS_speed
+                    activity: req.body.activity,
+                    began: req.body.began,
+                    ended: req.body.ended
                 });
 
                 // Save device. If successful, return success. If not, return error message.                          
@@ -79,6 +66,15 @@ router.post('/pulse', function(req, res, next) {
             return res.status(201).send(JSON.stringify(responseJson));
         }
     });
+});
+
+router.get('/threshold', (req,res)=>{
+    console.log("deviceId of requesting thresh: "+req.query.coreid);
+    User.findOne({ userDevices: req.query.coreid }, (err, user)=>{
+        if(user !== null){
+            return res.status(200).send(JSON.stringify(user.uvThreshold));
+        }
+    })
 });
 
 module.exports = router;

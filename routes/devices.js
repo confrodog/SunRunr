@@ -149,4 +149,8 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
+router.delete('/remove', (req,res)=>{
+    console.log(req.body);
+});
+
 module.exports = router;

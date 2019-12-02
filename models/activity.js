@@ -3,10 +3,14 @@ var db = require("../db");
 // Define the schema
 var activitySchema = new db.Schema({
     deviceId: String,
-    lon: Number,
-    lat: Number,
-    uv: Number,
-    speed: Number,
+    activity: [{
+        lon: Number,
+        lat: Number,
+        uv: Number,
+        speed: Number
+    }],
+    began: Number,
+    ended: Number,
     submitTime: { type: Date, default: Date.now }
 });
 
