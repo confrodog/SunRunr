@@ -27,12 +27,12 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   for (var device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
-      " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
-      " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +
+      /*" <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
+      " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
       " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn'>Remove Device</button> " +
       " </li>");
-    $("#ping-"+device.deviceId).click({deviceId: device.deviceId},pingDevice);
-    $("#activity-"+device.deviceId).click({deviceId: device.deviceId},populateDeviceActivity);
+    //$("#ping-"+device.deviceId).click({deviceId: device.deviceId},pingDevice);
+    //$("#activity-"+device.deviceId).click({deviceId: device.deviceId},populateDeviceActivity);
     $("#remove-"+device.deviceId).click({deviceId: device.deviceId},removeDevice);
   }
 }
@@ -67,11 +67,13 @@ function registerDevice() {
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
          " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
-         " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +
+         " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn'>Remove Device</button> " +
+         /* " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
          "</li>");
-       $("#ping-"+$("#deviceId").val()).click(function(event) {
-         pingDevice(event, device.deviceId);
-       });
+      //  $("#ping-"+$("#deviceId").val()).click(function(event) {
+      //    pingDevice(event, device.deviceId);
+      //  });
+      $("#remove-"+device.deviceId).click({deviceId: device.deviceId},removeDevice);
        hideAddDeviceForm();
      })
      .fail(function(jqXHR, textStatus, errorThrown) {
@@ -81,23 +83,25 @@ function registerDevice() {
      }); 
 }
 
-function pingDevice(event, deviceId) {
-   $.ajax({
-        url: '/devices/ping',
-        type: 'POST',
-        headers: { 'x-auth': window.localStorage.getItem("authToken") },   
-        data: { 'deviceId': deviceId }, 
-        responseType: 'json',
-        success: function (data, textStatus, jqXHR) {
-            console.log("Pinged.");
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            var response = JSON.parse(jqXHR.responseText);
-            $("#error").html("Error: " + response.message);
-            $("#error").show();
-        }
-    }); 
-}
+//Dont know if we want/need this
+
+// function pingDevice(event, deviceId) {
+//    $.ajax({
+//         url: '/devices/ping',
+//         type: 'POST',
+//         headers: { 'x-auth': window.localStorage.getItem("authToken") },   
+//         data: { 'deviceId': deviceId }, 
+//         responseType: 'json',
+//         success: function (data, textStatus, jqXHR) {
+//             console.log("Pinged.");
+//         },
+//         error: function(jqXHR, textStatus, errorThrown) {
+//             var response = JSON.parse(jqXHR.responseText);
+//             $("#error").html("Error: " + response.message);
+//             $("#error").show();
+//         }
+//     }); 
+// }
 
 function populateDeviceActivity(event){
   console.log(event.data.deviceId);
