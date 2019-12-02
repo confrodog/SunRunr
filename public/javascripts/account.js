@@ -6,7 +6,7 @@ function ShowAcct(){
   $('#main').hide();
 }
 
-
+//------------------------------------------------------------------------------
 function sendReqForAccountInfo() {
   $.ajax({
     url: '/users/account',
@@ -27,11 +27,13 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   for (var device of data.devices) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
-      " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
-      " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +
+      /*" <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
+      " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
+      " <button id='remove-" + device.deviceId + "' class='waves-effect waves-light btn'>Remove Device</button> " +
       " </li>");
-    $("#ping-"+device.deviceId).click({deviceId: device.deviceId},pingDevice);
-    $("#activity-"+device.deviceId).click({deviceId: device.deviceId},populateDeviceActivity);
+    //$("#ping-"+device.deviceId).click({deviceId: device.deviceId},pingDevice);
+    //$("#activity-"+device.deviceId).click({deviceId: device.deviceId},populateDeviceActivity);
+    $("#remove-"+device.deviceId).click({deviceId: device.deviceId},removeDevice);
   }
 }
 
@@ -48,6 +50,8 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
   } 
 }
 
+//------------------------------------------------------------------------------
+
 // Registers the specified device with the server.
 function registerDevice() {
   $.ajax({
@@ -62,12 +66,14 @@ function registerDevice() {
        // Add new device to the device list
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-         " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
-         " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +
+         /*" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +*/
+         " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Remove Device</button> " +
+         /* " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
          "</li>");
-       $("#ping-"+$("#deviceId").val()).click(function(event) {
-         pingDevice(event, device.deviceId);
-       });
+      //  $("#ping-"+$("#deviceId").val()).click(function(event) {
+      //    pingDevice(event, device.deviceId);
+      //  });
+      $("#remove-"+$("#deviceId").val()).click({deviceId: $("#deviceId").val()},removeDevice);
        hideAddDeviceForm();
      })
      .fail(function(jqXHR, textStatus, errorThrown) {
@@ -77,23 +83,25 @@ function registerDevice() {
      }); 
 }
 
-function pingDevice(event, deviceId) {
-   $.ajax({
-        url: '/devices/ping',
-        type: 'POST',
-        headers: { 'x-auth': window.localStorage.getItem("authToken") },   
-        data: { 'deviceId': deviceId }, 
-        responseType: 'json',
-        success: function (data, textStatus, jqXHR) {
-            console.log("Pinged.");
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            var response = JSON.parse(jqXHR.responseText);
-            $("#error").html("Error: " + response.message);
-            $("#error").show();
-        }
-    }); 
-}
+//Dont know if we want/need this
+
+// function pingDevice(event, deviceId) {
+//    $.ajax({
+//         url: '/devices/ping',
+//         type: 'POST',
+//         headers: { 'x-auth': window.localStorage.getItem("authToken") },   
+//         data: { 'deviceId': deviceId }, 
+//         responseType: 'json',
+//         success: function (data, textStatus, jqXHR) {
+//             console.log("Pinged.");
+//         },
+//         error: function(jqXHR, textStatus, errorThrown) {
+//             var response = JSON.parse(jqXHR.responseText);
+//             $("#error").html("Error: " + response.message);
+//             $("#error").show();
+//         }
+//     }); 
+// }
 
 function populateDeviceActivity(event){
   console.log(event.data.deviceId);
@@ -113,6 +121,11 @@ function populateDeviceActivity(event){
   })
 }
 
+function removeDevice(e){
+  console.log(e.data.deviceId);
+}
+
+//------------------------------------------------------------------------------
 function showEditAccount() {
   $("#fullNameEdit").val("");
   $("#editAccountButton").hide();
@@ -123,6 +136,7 @@ function hideEditAccount() {
   $("#editAccountButton").show();
   $("#editAccountInfo").slideUp();
 }
+//------------------------------------------------------------------------------
 
 // Show add device form and hide the add device button (really a link)
 function showAddDeviceForm() {
@@ -137,7 +151,7 @@ function hideAddDeviceForm() {
   $("#addDeviceForm").slideUp();  // Show the add device form
   $("#error").hide();
 }
-
+//------------------------------------------------------------------------------
 function sendUpdateRequest() {
   $.ajax({
     url: '/users/account',
@@ -148,6 +162,8 @@ function sendUpdateRequest() {
     .done(accountInfoOnlySuccess)
     .fail(accountInfoError);
 }
+
+//------------------------------------------------------------------------------
 
 // If the old password is correct, continue the update process
 function validateSuccess(data, textSatus, jqXHR) {
@@ -262,6 +278,8 @@ function accountInfoOnlySuccess(data, textSatus, jqXHR) {
     .done(validateSuccess)
     .fail(validateError);
 }
+
+//------------------------------------------------------------------------------
 
 // Handle authentication on page load
 $(function() {
