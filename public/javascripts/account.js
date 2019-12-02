@@ -66,7 +66,7 @@ function registerDevice() {
        // Add new device to the device list
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
-         " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
+         /*" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +*/
          " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Remove Device</button> " +
          /* " <button id='activity-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
          "</li>");
