@@ -181,7 +181,7 @@ router.delete('/remove/:deviceId', (req,res)=>{
             res.status(202).json({"message": "good"});
         });
     });
-    res.status(202).json({"message": "good"});
+    //res.status(202).json({"message": "good"});
 });
 
 module.exports = router;
