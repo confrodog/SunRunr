@@ -124,7 +124,7 @@ function populateDeviceActivity(event){
 function removeDevice(e){
   console.log(e.data.deviceId);
   $.ajax({
-    url: '/devices/remove?'+$.param({"deviceId": e.data.deviceId}),
+    url: '/devices/remove/'+ e.data.deviceId,
     type: 'DELETE',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },  
     //contentType: 'application/json',
