@@ -174,7 +174,8 @@ router.delete('/remove/:deviceId', (req,res)=>{
         responseJson.message = "Invalid authorization token.";
         return res.status(400).json(responseJson);
     }
-    Device.deleteOne({deviceId: req.params.deviceId},(err, device)=>{
+    Device.findOneAndRemove({deviceId: req.params.deviceId},(err, device)=>{
+        console.log("DEvice email: "+device.userEmail);
         console.log("removed device "+req.params.deviceId);
         User.findOneAndUpdate({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
             console.log("User: "+JSON.stringify(user));
