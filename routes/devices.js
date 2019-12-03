@@ -180,7 +180,7 @@ router.delete('/remove/:deviceId', (req,res)=>{
         User.findOneAndUpdate({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
             console.log("User: "+JSON.stringify(user));
             console.log("removed device from user "+user.email);
-            res.status(202).json({"message": "good"});
+            res.status(202).json({"message": "good", "deviceId": req.params.deviceId});
         });
     });
 });
