@@ -12,7 +12,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
 ## Account Creation and Management
  - [x] A user must be able to **create** an account, using an **email address** as the username and a **strong password**, and register **at least one** device with their account.
  - [x] A user should be able to **update** any of their account information.
- - [ ] (MEL) A user should be able to **replace** a device with a new one in their account.
+ - [x] A user should be able to **replace** a device with a new one in their account.
  - [x] A user should be able to have **more than one** device.
 ## IoT Device
  - [x] User should use a button on the IoT device to **start** and **stop** activities.
@@ -61,7 +61,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [ ] The web application should use **responsive design to be viewable
        on desktops, tablets, and smartphones.**
 ## Server
- - [ ] When an activity is sent to the server by the IoT device, the
+ - [x] When an activity is sent to the server by the IoT device, the
        server should assign a default activity type based on the speed
        data.
  - [ ] When an activity is sent to the server by the IoT device, the
