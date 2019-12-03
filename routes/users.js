@@ -148,22 +148,44 @@ router.get('/activities', (req, res) => {
     if (!req.headers["x-auth"]) {
         return res.status(401).json({ success: false, message: "No authentication token" });
     }
-    if (!req.query.deviceId) {
-        return res.status(401).json({ success: false, message: "No device ID specified." });
-    }
 
     var authToken = req.headers["x-auth"];
-
     try {
         var decodedToken = jwt.decode(authToken, secret);
-
-        Activity.find({ deviceId: req.query.deviceId }, function(err, activities) {
-            if (err) {
-                return res.status(400).json({ success: false, message: "there is an issue with activity storing." });
-            } else {
-                return res.status(200).json({ 'activities': activities })
+        var acts = {};
+        // Find devices based on decoded token
+        acts["activities"] = [];
+        Device.find({ userEmail: decodedToken.email }, function(err, devices) {
+            if (!err) {
+                // Construct device list                
+                let deviceList = [];
+                for (device of devices) {
+                    deviceList.push(device.deviceId);
+                }
+                var ret = {};
+                console.log(deviceList);
+                Activity.find({deviceId: {$in: deviceList }}, function(err, activities) {
+                    if (err) {
+                        console.log("error");
+                        return res.status(400).json({ success: false, message: "there is an issue with activity storing." });
+                    } else {
+                        for(var a of activities){
+                            ret["deviceId"] = a.deviceId;
+                            ret["activity"] = a.activity;
+                            ret["began"] = a.began;
+                            ret["ended"] = a.ended;
+                            ret["submit"] = a.submitTime
+                            acts["activities"].push(ret);
+                        }
+                    }
+                    return res.status(200).json(acts);
+                    
+                });
+                
             }
+            
         });
+        
     } catch (ex) {
         return res.status(401).json({ success: false, message: "Invalid authentication token." });
     }
