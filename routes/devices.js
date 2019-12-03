@@ -109,6 +109,7 @@ router.post('/register', function(req, res, next) {
                         console.log("user: "+ user);
                         if(user !== null){
                             user.userDevices.push(newDevice.deviceId);
+                            user.save(done);
                             responseJson.registered = true;
                             responseJson.apikey = deviceApikey;
                             responseJson.deviceId = req.body.deviceId;
