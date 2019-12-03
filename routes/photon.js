@@ -81,7 +81,7 @@ router.post('/pulse', function(req, res, next) {
                         responseJson.message = "Error saving data in db.";
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
-                        User.findOne({$in: {userDevices: req.body.deviceId}},(err, user)=>{
+                        User.findOne({userDevices: req.body.deviceId},(err, user)=>{
                             console.log(user);
                             responseJson.uvThreshold = user.uvThreshold;
                             responseJson.status = "OK";
