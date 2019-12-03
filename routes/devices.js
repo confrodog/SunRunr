@@ -105,7 +105,7 @@ router.post('/register', function(req, res, next) {
                     // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
                     return res.status(400).json(responseJson);
                 } else {
-                    User.findOne({email: newDevice.email},(err,user)=>{
+                    User.findOne({email: email},(err,user)=>{
                         console.log("user: "+ user);
                         if(user !== null){
                             user.userDevices.push(newDevice.deviceId);
