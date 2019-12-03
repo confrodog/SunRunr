@@ -167,20 +167,20 @@ router.post('/ping', function(req, res, next) {
 router.delete('/remove/:deviceId', (req,res)=>{
     console.log("deleting device...");
     console.log(req.params);
-    // try {
-    //     let decodedToken = jwt.decode(req.headers["x-auth"], secret);
-    // } catch (ex) {
-    //     console.log("bad authorization");
-    //     responseJson.message = "Invalid authorization token.";
-    //     return res.status(400).json(responseJson);
-    // }
-    // Device.remove({deviceId: req.body.deviceId},(err, device)=>{
-    //     console.log("removed device "+req.body.deviceId);
-    //     User.update({email:device.userEmail},(err, user)=>{
-    //         console.log("removed device from user "+user.email);
-    //         res.status(202).json({"message": "good"});
-    //     });
-    // });
+    try {
+        let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+    } catch (ex) {
+        console.log("bad authorization");
+        responseJson.message = "Invalid authorization token.";
+        return res.status(400).json(responseJson);
+    }
+    Device.remove({deviceId: req.params.deviceId},(err, device)=>{
+        console.log("removed device "+req.params.deviceId);
+        User.update({email:device.userEmail},(err, user)=>{
+            console.log("removed device from user "+user.email);
+            res.status(202).json({"message": "good"});
+        });
+    });
     res.status(202).json({"message": "good"});
 });
 
