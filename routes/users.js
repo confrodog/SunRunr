@@ -162,22 +162,26 @@ router.get('/activities', (req, res) => {
                 for (device of devices) {
                     deviceList.push(device.deviceId);
                 }
-                var ret = {};
                 console.log(deviceList);
                 Activity.find({deviceId: {$in: deviceList }}, function(err, activities) {
                     if (err) {
                         console.log("error");
                         return res.status(400).json({ success: false, message: "there is an issue with activity storing." });
                     } else {
+                        console.log(activities);
                         for(var a of activities){
+                            let ret = {};
                             ret["deviceId"] = a.deviceId;
                             ret["activity"] = a.activity;
                             ret["began"] = a.began;
+                            ret["activityType"] = a.activityType;
                             ret["ended"] = a.ended;
                             ret["submit"] = a.submitTime
+                            console.log(ret);
                             acts["activities"].push(ret);
                         }
                     }
+                    console.log(acts);
                     return res.status(200).json(acts);
                     
                 });

@@ -2,26 +2,22 @@ var weekdays = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Augu", "Sep", "Oct", "Nov", "Dec"];
 
 function createFirstDiv(a){
-  //var fdiv = document.createElement("div");
-  var fdiv = $('<div></div>');
+  var fdiv = document.createElement("div");
   var d = new Date(0);
   d.setUTCSeconds(a.began);
-  //var datediv = document.createElement("div");
-  var datediv = $('<div></div>')
-  datediv.html("<strong>Date: </strong>" + months[d.getMonth()] + ". " + d.getDate() + ", " + d.getFullYear());
+  var datediv = document.createElement("div");
+  datediv.innerHTML = "<strong>Date: </strong>" + months[d.getMonth()] + ". " + d.getDate() + ", " + d.getFullYear();
   
-  //var durdiv = document.createElement("div");
-  var durdiv = $('<div></div>');
+  var durdiv = document.createElement("div");
   var seconds = parseInt(a.ended - a.began);
   var hrs   = Math.floor(seconds / 3600);
   seconds  -= hrs*3600;
   var mnts = Math.floor(seconds / 60);
   seconds  -= mnts*60;
-  durdiv.html("<strong>Duration: </strong>" + hrs + " hours, " + mnts + " mins, " + seconds + " seconds");
+  durdiv.innerHTML = ("<strong>Duration: </strong>" + hrs + ":" + ("0" + mnts).slice(-2) + ":" + ("0" + seconds).slice(-2));
   
-  //var caldiv = document.createElement("div");
-  var caldiv = $('<div></div>');
-  caldiv.html("<strong>Calories Burned: </strong> 100");
+  var caldiv = document.createElement("div");
+  caldiv.innerHTML = "<strong>Calories Burned: </strong> 100";
   //CALCULATE CALORIES
   fdiv.append(datediv);
   fdiv.append(durdiv);
@@ -31,13 +27,14 @@ function createFirstDiv(a){
 
 function createSecDiv(a){
   var sdiv = document.createElement("div");
-  
   var uvdiv = document.createElement("div");
-  uvdiv.innerHTML = "<strong>UV Exposure: </strong>" + a.activity[0].uv;
-  
+  var uv = 0;
+  for(uvs of a.activity){
+    uv += uvs.uv;
+  }
+  uvdiv.innerHTML = "<strong>UV Exposure: </strong>" + (uv/ a.activity.length);
   var tempdiv = document.createElement("div");
   tempdiv.innerHTML = "<strong>Temperature: </strong> 100&#8457;" ;
-  
   var humdiv = document.createElement("div");
   humdiv.innerHTML = "<strong>Humidity: </strong> 341";
   //CALCULATE CALORIES
@@ -47,17 +44,126 @@ function createSecDiv(a){
   return sdiv;
 }
 
-function createContent(){
-  var sel = $('<select name="activitytype" id="activitytype"></select>')
-  var ow = $('<option value="walk" selected>Walking</option>');
-  var or = $('<option value="run">Running</option>');
-  var ob = $('<option value="bike">Bikeing</option>');
+function createContent(a, i){
+  var div = document.createElement("div");
+  var sel = document.createElement("select");
+  sel.name = "activitytype";
+  sel.id = i + "_acttype";
+  var label = document.createElement("label");
+  label.htmlFor = "activitytype";
+  label.innerText = "Activity Type: ";
+  div.append(label);
+  var ow = document.createElement("option");
+  var or = document.createElement("option");
+  var ob = document.createElement("option");
+  ow.value = "walk";
+  or.value = "run";
+  ob.value = "bike";
+  ow.innerText = "Walking";
+  or.innerText = "Running";
+  ob.innerText = "Biking";
   sel.append(ow);
   sel.append(or);
   sel.append(ob);
+  sel.value = a.activityType;
+  div.append(sel);
 
-  return sel;
+  div.append(createChart(a));
 
+  return div;
+
+}
+
+function sum7days(acts){
+  var today = new Date();
+  var last = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000));
+  last.setHours(0,0,0,0);
+  var totActDuration = 0;
+  var totCalBurned = 0;
+  var totUV = 0;
+
+  for(var a of acts){
+    totActDuration += (a.ended - a.began);
+    for(var u of a.activity){
+      totUV += u.uv;
+    }
+  }
+
+  //console.log(totUV);
+  var sec = parseInt(totActDuration);
+  var days = Math.floor(sec / 86400);
+  var hours = Math.floor((sec % 86400) / 3600);
+  var min = Math.floor(((sec % 86400) % 3600) / 60);
+  var sec = ((sec % 86400) % 3600) % 60;
+  $('#totactdur').html(days + ':' + ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2));
+  $('#totuvexp').html(totUV);
+  $('.loader').hide();
+  console.log("");
+}
+
+function createChart(a){
+  var curr = 15;
+  var x = [0];
+  var speedy = [0]
+  var uvy = [0];
+  for(var act of a.activity){
+    x.push(curr);
+    speedy.push(act.speed);
+    uvy.push(act.uv);
+    curr+=15;
+  }
+  var ctx = document.createElement("canvas");
+  ctx.classList.add("chart");
+  var myLineChart = new Chart(ctx, {
+    type: 'line',
+    data: 
+    {
+      labels: x,
+      datasets: [
+        {
+          label: 'Speed',
+          data: speedy,
+          borderColor:'#8e5ea2',
+          fill: false
+        },
+        {
+          label: 'UV',
+          data: uvy,
+          borderColor: '#3e95cd',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      scales: {
+          xAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Time (seconds)'
+            }
+          }]
+      }
+  }
+});
+
+return ctx;
+}
+
+function collap(){
+  var coll = document.getElementsByClassName("collapsible");
+  var i;
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      } 
+    });
+  }
 }
 
 function populateDeviceActivity(){
@@ -69,34 +175,34 @@ function populateDeviceActivity(){
     contentType: 'application/json',
     dataType: 'json'
   }).done(function(data){
-    for(var a of data.activities){
-      console.log(a);
-      var li = $('<li></li>')
-      //var li = document.createElement("li");
-      var coldiv = $('<div class="collapsible blue"></div>')
-      //var coldiv = document.createElement("div");
-      //coldiv.classList.add("collapsible");
-      //coldiv.classList.add("blue");
-      var fdiv = createFirstDiv(a);
-      //var sdiv = createSecDiv(a);
+    var d = data.activities;
+    console.log(d);
+    sum7days(d);
+    for(var a in d){
+      console.log();
+      var li = document.createElement("li");
+      li.id = a + "_activity";
+      var coldiv = document.createElement("div");
+      coldiv.classList.add("collapsible");
+      coldiv.classList.add("blue");
+      var fdiv = createFirstDiv(d[a]);
+      var sdiv = createSecDiv(d[a]);
       coldiv.append(fdiv);
-      //coldiv.append(sdiv);
-      var i = $('<i class="material-icons collapsible-secondary>arrow_drop_down</i>')
-      //var i = document.createElement("i");
-      //i.classList.add("material-icons");
-      //i.classList.add("collapsible-secondary");
-      //i.innerText = "arrow_drop_down";
+      coldiv.append(sdiv);
+      var i = document.createElement("i");
+      i.classList.add("material-icons");
+      i.classList.add("collapsible-secondary");
+      i.innerText = "arrow_drop_down";
       coldiv.append(i);
       li.append(coldiv);
-      //var con = document.createElement("div");
-      var con = $('<div class="content"></div>');
-      con.append(createContent());
-      //console.log(createContent());
-      //con.classList.add("content");
+      var con = document.createElement("div");
+      con.append(createContent(d[a], a));
+      con.classList.add("content");
       li.append(con);
       $('#activities ul').append(li);
 
     }
+    collap();
   })
 }
 
@@ -146,18 +252,6 @@ $(document).ready(function(){
   .fail(console.log("FAIL"));
 
 
-  var coll = document.getElementsByClassName("collapsible");
-  var i;
-  for (i = 0; i < coll.length; i++) {
-    coll[i].addEventListener("click", function() {
-      this.classList.toggle("active");
-      var content = this.nextElementSibling;
-      if (content.style.maxHeight){
-        content.style.maxHeight = null;
-      } else {
-        content.style.maxHeight = content.scrollHeight + "px";
-      } 
-    });
-  }
+
 
 });
