@@ -170,6 +170,7 @@ router.delete('/remove', (req,res)=>{
     try {
         let decodedToken = jwt.decode(req.headers["x-auth"], secret);
     } catch (ex) {
+        console.log("bad authorization");
         responseJson.message = "Invalid authorization token.";
         return res.status(400).json(responseJson);
     }
