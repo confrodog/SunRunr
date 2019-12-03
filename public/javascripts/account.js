@@ -125,7 +125,7 @@ function removeDevice(e){
   console.log(e.data.deviceId);
   $.ajax({
     url: '/devices/remove',
-    type: 'DELETE',
+    type: 'POST',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },  
     contentType: 'application/json',
     data: { deviceId: e.data.deviceId }, 

@@ -164,7 +164,7 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
-router.delete('/remove', (req,res)=>{
+router.post('/remove', (req,res)=>{
     console.log("deleting device...");
     console.log(req.body);
     try {
