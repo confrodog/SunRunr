@@ -164,16 +164,16 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
-router.post('/remove', (req,res)=>{
+router.delete('/remove', (req,res)=>{
     console.log("deleting device...");
     console.log(req.body);
-    try {
-        let decodedToken = jwt.decode(req.headers["x-auth"], secret);
-    } catch (ex) {
-        console.log("bad authorization");
-        responseJson.message = "Invalid authorization token.";
-        return res.status(400).json(responseJson);
-    }
+    // try {
+    //     let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+    // } catch (ex) {
+    //     console.log("bad authorization");
+    //     responseJson.message = "Invalid authorization token.";
+    //     return res.status(400).json(responseJson);
+    // }
     // Device.remove({deviceId: req.body.deviceId},(err, device)=>{
     //     console.log("removed device "+req.body.deviceId);
     //     User.update({email:device.userEmail},(err, user)=>{
