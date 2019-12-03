@@ -105,21 +105,20 @@ router.post('/register', function(req, res, next) {
                     // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
                     return res.status(400).json(responseJson);
                 } else {
-                    User.findOne({email: email},(err,user)=>{
+                    User.findOneAndUpdate({email: email},{$push:{userDevices: req.body.deviceId}},(err,user)=>{
                         console.log("user: "+ user);
-                        if(user !== null){
-                            user.userDevices.push(newDevice.deviceId);
-                            user.save(done);
+                        if(err){
+                            responseJson.message = err;
+                            // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
+                            return res.status(400).json(responseJson);
+                        }
+                        else{
                             responseJson.registered = true;
                             responseJson.apikey = deviceApikey;
                             responseJson.deviceId = req.body.deviceId;
                             responseJson.message = "Device ID " + req.body.deviceId + " was registered and added to "+user.email+" list.";
                             return res.status(201).json(responseJson);
-                        }
-                        else{
-                            responseJson.message = err;
-                            // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
-                            return res.status(400).json(responseJson);
+                            
                         }
                         
                     });
