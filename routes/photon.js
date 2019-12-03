@@ -4,6 +4,28 @@ var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
+function calculateActivity(activity){
+    console.log("activity: "+activity);
+    let speed = 0.0;
+    for(a of activity){
+        speed += parseFloat(a.speed);
+    }
+    console.log("total speed: "+speed);
+    speed /= activity.length;
+    if(speed <= 2){
+        return "walk";
+    }
+    else if(speed > 2 && speed <=4){
+        return "run";
+    }
+    else if(speed > 4){
+        return "biking";
+    }
+    else{
+        return ""+speed;
+    }
+}
+
 /* POST: Register new device. */
 router.post('/pulse', function(req, res, next) {
     var responseJson = {
@@ -40,11 +62,15 @@ router.post('/pulse', function(req, res, next) {
                 return res.status(201).send(JSON.stringify(responseJson));
             } else {
                 // Create a new hw data with user email time stamp 
+                
+                actType = calculateActivity(req.body.activity);
+                console.log("actType: "+actType);
                 var activity = new Activity({
                     deviceId: req.body.deviceId,
                     activity: req.body.activity,
                     began: req.body.began,
-                    ended: req.body.ended
+                    ended: req.body.ended,
+                    activityType: actType
                 });
 
                 // Save device. If successful, return success. If not, return error message.                          
