@@ -131,9 +131,9 @@ function removeDevice(e){
     //data: { deviceId: e.data.deviceId }, 
     dataType: 'json'
   }).done(function(data){
-    console.log("data: "+data);
-    
-    $('#'+e.data.deviceId).remove();
+    console.log("data: "+data.deviceId);
+
+    $('#'+data.deviceId).remove();
   })
 }
 
