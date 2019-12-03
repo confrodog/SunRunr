@@ -164,9 +164,9 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
-router.delete('/remove', (req,res)=>{
+router.delete('/remove/:deviceId', (req,res)=>{
     console.log("deleting device...");
-    console.log(req.body);
+    console.log(req.params);
     // try {
     //     let decodedToken = jwt.decode(req.headers["x-auth"], secret);
     // } catch (ex) {
