@@ -25,7 +25,7 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   
   // Add the devices to the list before the list item for the add device button (link)
   for (var device of data.devices) {
-    $("#addDeviceForm").before("<li class='collection-item'>ID: " +
+    $("#addDeviceForm").before("<li class='collection-item' id='li-"+device.deviceId+"'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
       /*" <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
       " <button id='activity-" + device.deviceId + "' class='waves-effect waves-light btn'>Show Activity</button> " +*/
@@ -64,7 +64,7 @@ function registerDevice() {
    })
      .done(function (data, textStatus, jqXHR) {
        // Add new device to the device list
-       $("#addDeviceForm").before("<li class='collection-item'>ID: " +
+       $("#addDeviceForm").before("<li class='collection-item' id='li-"+$("#deviceId").val()+"'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
          /*" <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +*/
          " <button id='remove-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Remove Device</button> " +
@@ -133,7 +133,7 @@ function removeDevice(e){
   }).done(function(data){
     console.log("data: "+data.deviceId);
 
-    $('#'+data.deviceId).remove();
+    $('#li-'+data.deviceId).remove();
   })
 }
 
