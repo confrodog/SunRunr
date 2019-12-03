@@ -99,12 +99,14 @@ router.post('/register', function(req, res, next) {
 
             // Save device. If successful, return success. If not, return error message.
             newDevice.save(function(err, newDevice) {
+                console.log("new device: "+newDevice);
                 if (err) {
                     responseJson.message = err;
                     // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
                     return res.status(400).json(responseJson);
                 } else {
                     User.findOne({email: newDevice.email},(err,user)=>{
+                        console.log("user: "+ user);
                         if(user !== null){
                             user.userDevices.push(newDevice.deviceId);
                             responseJson.registered = true;
