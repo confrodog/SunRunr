@@ -128,7 +128,7 @@ function removeDevice(e){
     type: 'DELETE',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },  
     contentType: 'application/json',
-    data: { deviceId: event.data.deviceId }, 
+    data: { deviceId: e.data.deviceId }, 
     dataType: 'json'
   }).done(function(data){
     $('#'+e.data.deviceId).remove();
