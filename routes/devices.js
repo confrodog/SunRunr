@@ -106,7 +106,7 @@ router.post('/register', function(req, res, next) {
                     return res.status(400).json(responseJson);
                 } else {
                     User.findOneAndUpdate({email: email},{$push:{userDevices: req.body.deviceId}},(err,user)=>{
-                        console.log("user: "+ user);
+                        //console.log("user: "+ user);
                         if(err){
                             responseJson.message = err;
                             // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
@@ -174,9 +174,10 @@ router.delete('/remove/:deviceId', (req,res)=>{
         responseJson.message = "Invalid authorization token.";
         return res.status(400).json(responseJson);
     }
-    Device.remove({deviceId: req.params.deviceId},(err, device)=>{
+    Device.deleteOne({deviceId: req.params.deviceId},(err, device)=>{
         console.log("removed device "+req.params.deviceId);
-        User.update({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
+        User.updateOne({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
+            console.log("User: "+user);
             console.log("removed device from user "+user.email);
             res.status(202).json({"message": "good"});
         });
