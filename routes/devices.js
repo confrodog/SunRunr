@@ -176,8 +176,8 @@ router.delete('/remove/:deviceId', (req,res)=>{
     }
     Device.deleteOne({deviceId: req.params.deviceId},(err, device)=>{
         console.log("removed device "+req.params.deviceId);
-        User.updateOne({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
-            console.log("User: "+user);
+        User.findOneAndUpdate({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
+            console.log("User: "+JSON.stringify(user));
             console.log("removed device from user "+user.email);
             res.status(202).json({"message": "good"});
         });
