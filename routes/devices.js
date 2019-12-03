@@ -166,6 +166,20 @@ router.post('/ping', function(req, res, next) {
 
 router.delete('/remove', (req,res)=>{
     console.log(req.body);
+    try {
+        let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+    } catch (ex) {
+        responseJson.message = "Invalid authorization token.";
+        return res.status(400).json(responseJson);
+    }
+    // Device.remove({deviceId: req.body.deviceId},(err, device)=>{
+    //     console.log("removed device "+req.body.deviceId);
+    //     User.update({email:device.userEmail},(err, user)=>{
+    //         console.log("removed device from user "+user.email);
+    //         res.status(202).json({"message": "good"});
+    //     });
+    // });
+    res.status(202).json({"message": "good"});
 });
 
 module.exports = router;

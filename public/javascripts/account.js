@@ -123,6 +123,16 @@ function populateDeviceActivity(event){
 
 function removeDevice(e){
   console.log(e.data.deviceId);
+  $.ajax({
+    url: '/devices/remove',
+    type: 'DELETE',
+    headers: { 'x-auth': window.localStorage.getItem("authToken") },  
+    contentType: 'application/json',
+    data: { deviceId: event.data.deviceId }, 
+    dataType: 'json'
+  }).done(function(data){
+    $('#'+e.data.deviceId).remove();
+  })
 }
 
 //------------------------------------------------------------------------------
