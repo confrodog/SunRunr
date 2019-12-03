@@ -165,6 +165,7 @@ router.post('/ping', function(req, res, next) {
 });
 
 router.delete('/remove', (req,res)=>{
+    console.log("deleting device...");
     console.log(req.body);
     try {
         let decodedToken = jwt.decode(req.headers["x-auth"], secret);
