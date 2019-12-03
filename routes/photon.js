@@ -30,7 +30,8 @@ function calculateActivity(activity){
 router.post('/pulse', function(req, res, next) {
     var responseJson = {
         status: "",
-        message: ""
+        message: "",
+        uvThreshold: "NA"
     };
 
     if (!req.body.hasOwnProperty("activity")) {
@@ -80,9 +81,13 @@ router.post('/pulse', function(req, res, next) {
                         responseJson.message = "Error saving data in db.";
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
-                        responseJson.status = "OK";
-                        responseJson.message = "Data saved in db with object ID " + run._id + ".";
-                        return res.status(201).send(JSON.stringify(responseJson));
+                        User.findOne({$in: {userDevices: req.body.deviceId}},(err, user)=>{
+                            responseJson.uvThreshold = user.uvThreshold;
+                            responseJson.status = "OK";
+                            responseJson.message = "Data saved in db with object ID " + run._id + ".";
+                            return res.status(201).send(JSON.stringify(responseJson));
+                        })
+                        
                     }
                 });
             }
