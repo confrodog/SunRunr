@@ -176,12 +176,11 @@ router.delete('/remove/:deviceId', (req,res)=>{
     }
     Device.remove({deviceId: req.params.deviceId},(err, device)=>{
         console.log("removed device "+req.params.deviceId);
-        User.update({email:device.userEmail},(err, user)=>{
+        User.update({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
             console.log("removed device from user "+user.email);
             res.status(202).json({"message": "good"});
         });
     });
-    //res.status(202).json({"message": "good"});
 });
 
 module.exports = router;
