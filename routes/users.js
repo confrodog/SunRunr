@@ -37,43 +37,69 @@ router.put('/update', function(req, res, next) {
     let password = req.body.password;
     let email = req.body.email;
     let fullName = req.body.fullName;
+    let uvThreshold = req.body.uvThreshold;
+
+    console.log(req.body);
+
+    let responseJson = {
+        "nameChanged": false,
+        "passwordChanged": false,
+        "uvChanged": false,
+        "success": false,
+        "message": ''
+    }
     
+    let promiseArray = [];
+
+    const updatePassword = bcrypt.hash(password, 10, function(err, hash) {
+        if (err) {
+            responseJson = {success: false, message: err.errmsg};
+        } else {
+            User.findOneAndUpdate({ email: email }, { passwordHash: hash });
+        }
+    });
+
+    const updateName = User.findOneAndUpdate({ email: email} ,{ fullName: fullName});
+
+    const updateUVThreshold = User.findOneAndUpdate({email: email},{uvThreshold: uvThreshold});
+
     // If no password or full name given, update nothing
-    if (!password && !fullName) {
+    if (!password && !fullName && !uvThreshold) {
         res.status(201).json({ success: true, message: "Nothing has been updated!"});
         return;
     }
     // If no full name given, update the password
-    if (!fullName) {
-        bcrypt.hash(password, 10, function(err, hash) {
-            if (err) {
-                res.status(400).json({success: false, message: err.errmsg});
-            } else {
-                User.findOneAndUpdate({ email: email }, 
-                    { passwordHash: hash }, 
-                    function(err, user) {
-                        if (err) {res.status(400).json({success:false, message: err.errmsg});}
-                        else {
-                           console.log(user.fullName + "'s password has been updated");
-                           res.status(201).json({ success: true, message: "Password has been updated." });
-                        }
-                    });
-            }
-        });
-        return;
+    if (password) {
+        console.log("changing password");
+        responseJson.passwordChanged = true;
+        responseJson.success = true;
+        responseJson.message = "password has been updated";
+        promiseArray.push(updatePassword);
     }
     // If no password given, update the name
-    if (!password) {
-        User.findOneAndUpdate({ email: email} ,
-            { fullName: fullName},
-            function(err, user) {
-                if (err) {res.status(400).json({success:false, message: err.errmsg});}
-                    else {
-                        console.log(user.fullName + "'s name has been updated");
-                        res.status(201).json({ success: true, message: "Name has been updated." });
-                    }
-            });
+    if (fullName) {
+        console.log("changing name");
+        responseJson.nameChanged = true;
+        responseJson.success = true;
+        responseJson.message = "name has been updated";
+        promiseArray.push(updateName);
     }
+    if(uvThreshold){
+        console.log("changing uv");
+        responseJson.uvChanged = true;
+        responseJson.success = true;
+        responseJson.message ="uvThreshold has been updated";
+        promiseArray.push(updateUVThreshold);
+    }
+    console.log("Promise Array:");
+    console.log(promiseArray.length);
+    Promise
+    .all(promiseArray).then((values)=>{
+        return res.status(201).send(responseJson);
+    })
+    .catch((reason)=>{
+        return res.status(400).send({ reason: 'unknown' });
+    });
 });
 
 /* Register a new user */
@@ -120,6 +146,7 @@ router.get("/account", function(req, res) {
                 userStatus['email'] = user.email;
                 userStatus['fullName'] = user.fullName;
                 userStatus['lastAccess'] = user.lastAccess;
+                userStatus['uvThreshold'] = user.uvThreshold;
 
                 // Find devices based on decoded token
                 Device.find({ userEmail: decodedToken.email }, function(err, devices) {

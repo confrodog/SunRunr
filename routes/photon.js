@@ -13,10 +13,10 @@ function calculateActivity(activity){
     console.log("total speed: "+speed);
     speed /= activity.length;
     if(speed <= 2){
-        return "walk";
+        return "walking";
     }
     else if(speed > 2 && speed <=4){
-        return "run";
+        return "running";
     }
     else if(speed > 4){
         return "biking";
@@ -30,7 +30,8 @@ function calculateActivity(activity){
 router.post('/pulse', function(req, res, next) {
     var responseJson = {
         status: "",
-        message: ""
+        message: "",
+        uvThreshold: "NA"
     };
 
     if (!req.body.hasOwnProperty("activity")) {
@@ -80,9 +81,14 @@ router.post('/pulse', function(req, res, next) {
                         responseJson.message = "Error saving data in db.";
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
-                        responseJson.status = "OK";
-                        responseJson.message = "Data saved in db with object ID " + run._id + ".";
-                        return res.status(201).send(JSON.stringify(responseJson));
+                        User.findOne({userDevices: req.body.deviceId},(err, user)=>{
+                            console.log(user);
+                            responseJson.uvThreshold = user.uvThreshold;
+                            responseJson.status = "OK";
+                            responseJson.message = "Data saved in db with object ID " + run._id + ".";
+                            return res.status(201).send(JSON.stringify(responseJson));
+                        })
+                        
                     }
                 });
             }
