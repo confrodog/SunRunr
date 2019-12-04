@@ -1,4 +1,7 @@
 var db = require("../db");
+var autoIncrement = require("mongoose-auto-increment");
+
+autoIncrement.initialize(db);
 
 // Define the schema
 var activitySchema = new db.Schema({
@@ -15,6 +18,7 @@ var activitySchema = new db.Schema({
     submitTime: { type: Date, default: Date.now }
 });
 
+activitySchema.plugin(autoIncrement.plugin, "Activity");
 // Creates a Devices (plural) collection in the db using the device schema
 var Activity = db.model("Activity", activitySchema);
 
