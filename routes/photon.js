@@ -5,18 +5,18 @@ var Device = require("../models/device");
 var Activity = require("../models/activity");
 
 function calculateActivity(activity){
-    console.log("activity: "+activity);
     let speed = 0.0;
     for(a of activity){
         speed += parseFloat(a.speed);
     }
     console.log("total speed: "+speed);
     speed /= activity.length;
+    console.log("average speed: "+speed);
     if(speed <= 2){
-        return "walk";
+        return "walking";
     }
     else if(speed > 2 && speed <=4){
-        return "run";
+        return "running";
     }
     else if(speed > 4){
         return "biking";
@@ -30,7 +30,8 @@ function calculateActivity(activity){
 router.post('/pulse', function(req, res, next) {
     var responseJson = {
         status: "",
-        message: ""
+        message: "",
+        uvThreshold: "NA"
     };
 
     if (!req.body.hasOwnProperty("activity")) {
@@ -39,7 +40,11 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     req.body.activity.pop();
-    console.log(req.body);
+    console.log("API key: "+req.body.apikey);
+    console.log("Activity: ");
+    console.log(req.body.activity);
+    console.log("Activity size: "+req.body.activity.length);
+    console.log("Activity size in bytes: "+JSON.stringify(req.body.activity).length);
     // // Ensure the POST data include properties id and email
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
@@ -80,9 +85,14 @@ router.post('/pulse', function(req, res, next) {
                         responseJson.message = "Error saving data in db.";
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
-                        responseJson.status = "OK";
-                        responseJson.message = "Data saved in db with object ID " + run._id + ".";
-                        return res.status(201).send(JSON.stringify(responseJson));
+                        User.findOne({userDevices: req.body.deviceId},(err, user)=>{
+                            //console.log(user);
+                            responseJson.uvThreshold = user.uvThreshold;
+                            responseJson.status = "OK";
+                            responseJson.message = "Data saved in db with object ID " + run._id + ".";
+                            return res.status(201).send(JSON.stringify(responseJson));
+                        })
+                        
                     }
                 });
             }

@@ -20,6 +20,7 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   $("#email").html(data.email);
   $("#fullName").html(data.fullName);
   $("#lastAccess").html(data.lastAccess);
+  $('#uvThreshold').html(data.uvThreshold);
   
   // Add the devices to the list before the list item for the add device button (link)
   for (var device of data.devices) {
@@ -183,12 +184,20 @@ function validateSuccess(data, textSatus, jqXHR) {
     data: {
       email: userEmail,
       password: $('#passwordEdit').val(),
-      fullName: $("#fullNameEdit").val()
+      fullName: $("#fullNameEdit").val(),
+      uvThreshold: $('#uvThresholdEdit').val()
     },
     dataType: "json"
   }).done(function(returnedData) {
+    if(returnedData.nameChanged){
+      $('#fullName').html($("#fullNameEdit").val());
+    }
+    if(returnedData.uvChanged){
+      $('#uvThreshold').html($('#uvThresholdEdit').val());
+    }
     $('#editErrors').html("Success! " + returnedData.message);
     $('#editErrors').show();
+    hideEditAccount()
   }).fail(function(jqXHR) {
     $('#editErrors').html("Error: Could not update account information.");
     $('#editErrors').show();
