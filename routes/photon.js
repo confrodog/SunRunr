@@ -40,7 +40,9 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     req.body.activity.pop();
-    console.log(req.body);
+    console.log("API key: "+req.body.apikey);
+    console.log("Activity: ");
+    console.log(req.body.activity);
     // // Ensure the POST data include properties id and email
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
@@ -82,7 +84,7 @@ router.post('/pulse', function(req, res, next) {
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
                         User.findOne({userDevices: req.body.deviceId},(err, user)=>{
-                            console.log(user);
+                            //console.log(user);
                             responseJson.uvThreshold = user.uvThreshold;
                             responseJson.status = "OK";
                             responseJson.message = "Data saved in db with object ID " + run._id + ".";
