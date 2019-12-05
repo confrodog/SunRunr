@@ -5,13 +5,13 @@ var Device = require("../models/device");
 var Activity = require("../models/activity");
 
 function calculateActivity(activity){
-    console.log("activity: "+activity);
     let speed = 0.0;
     for(a of activity){
         speed += parseFloat(a.speed);
     }
     console.log("total speed: "+speed);
     speed /= activity.length;
+    console.log("average speed: "+speed);
     if(speed <= 2){
         return "walking";
     }
@@ -43,6 +43,8 @@ router.post('/pulse', function(req, res, next) {
     console.log("API key: "+req.body.apikey);
     console.log("Activity: ");
     console.log(req.body.activity);
+    console.log("Activity size: "+req.body.activity.length);
+    console.log("Activity size in bytes: "+JSON.stringify(req.body.activity).length);
     // // Ensure the POST data include properties id and email
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
