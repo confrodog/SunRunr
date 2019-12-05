@@ -10,15 +10,24 @@ function createFirstDiv(a){
   
   var durdiv = document.createElement("div");
   var seconds = parseInt(a.ended - a.began);
-  var hrs   = Math.floor(seconds / 3600);
-  seconds  -= hrs*3600;
-  var mnts = Math.floor(seconds / 60);
-  seconds  -= mnts*60;
-  durdiv.innerHTML = ("<strong>Duration: </strong>" + hrs + ":" + ("0" + mnts).slice(-2) + ":" + ("0" + seconds).slice(-2));
+  var hours = Math.floor((seconds % 86400) / 3600);
+  var min = Math.floor(((seconds % 86400) % 3600) / 60);
+  var sec = ((seconds % 86400) % 3600) % 60;
+  durdiv.innerHTML = ("<strong>Duration: </strong>" + hours + ":" + ("0" + min).slice(-2) + ":" + ("0" + sec).slice(-2));
   
   var caldiv = document.createElement("div");
-  caldiv.innerHTML = "<strong>Calories Burned: </strong> 100";
   //CALCULATE CALORIES
+  var calBurn = 0;
+  if(a.activityType == 'walk'){
+    calBurn = 344 * (seconds%86400)/3600;
+  }
+  else if(a.activityType == 'run'){
+    calBurn = 672 * (seconds%86400)/3600;
+  }
+  else if(a.activityType == 'bike'){
+    calBurn = 600 * (seconds%86400)/3600;
+  }
+  caldiv.innerHTML = "<strong>Calories Burned: </strong>" + Math.round(calBurn);
   fdiv.append(datediv);
   fdiv.append(durdiv);
   fdiv.append(caldiv);
@@ -49,6 +58,7 @@ function createContent(a, i){
   var sel = document.createElement("select");
   sel.name = "activitytype";
   sel.id = i + "_acttype";
+  sel.classList.add("activityType");
   var label = document.createElement("label");
   label.htmlFor = "activitytype";
   label.innerText = "Activity Type: ";
@@ -83,10 +93,26 @@ function sum7days(acts){
   var totUV = 0;
 
   for(var a of acts){
-    totActDuration += (a.ended - a.began);
-    for(var u of a.activity){
-      totUV += u.uv;
-    }
+    var b = new Date(0);
+    b.setUTCSeconds(a.began)
+    var e = new Date(0);
+    e.setUTCSeconds(a.ended);
+    var dur = a.ended - a.began;
+    //if(b >= last){
+      totActDuration += (dur);
+      if(a.activityType == 'walk'){
+        totCalBurned += 344 * (dur%86400)/3600;
+      }
+      else if(a.activityType == 'run'){
+        totCalBurned += 672 * (dur%86400)/3600;
+      }
+      else if(a.activityType == 'bike'){
+        totCalBurned += 600 * (dur%86400)/3600;
+      }
+      for(var u of a.activity){
+        totUV += u.uv;
+      }
+    //}
   }
 
   //console.log(totUV);
@@ -96,6 +122,7 @@ function sum7days(acts){
   var min = Math.floor(((sec % 86400) % 3600) / 60);
   var sec = ((sec % 86400) % 3600) % 60;
   $('#totactdur').html(days + ':' + ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2));
+  $('#totcalbur').html(Math.round(totCalBurned));
   $('#totuvexp').html(totUV);
   $('.loader').hide();
   console.log("");
@@ -203,6 +230,10 @@ function populateDeviceActivity(){
 
     }
     collap();
+    $('.activityType').change(function(e){
+      var id = e.target.id;
+      //CHANGE ON DATABASE ON ID
+    });
   })
 }
 
