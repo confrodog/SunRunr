@@ -5,7 +5,7 @@ let fs = require('fs');
 let jwt = require("jwt-simple");
 
 /* Authenticate user */
-var secret = fs.readFileSync(__dirname + '/../../jwtkey.txt').toString();
+var secret = fs.readFileSync(__dirname + '\\..\\..\\jwtkey.txt').toString();
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
