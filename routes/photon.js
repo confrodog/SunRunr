@@ -1,13 +1,37 @@
 var express = require('express');
 var router = express.Router();
+var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
+
+function calculateActivity(activity){
+    let speed = 0.0;
+    for(a of activity){
+        speed += parseFloat(a.speed);
+    }
+    console.log("total speed: "+speed);
+    speed /= activity.length;
+    console.log("average speed: "+speed);
+    if(speed <= 2){
+        return "walking";
+    }
+    else if(speed > 2 && speed <=4){
+        return "running";
+    }
+    else if(speed > 4){
+        return "biking";
+    }
+    else{
+        return ""+speed;
+    }
+}
 
 /* POST: Register new device. */
 router.post('/pulse', function(req, res, next) {
     var responseJson = {
         status: "",
-        message: ""
+        message: "",
+        uvThreshold: "NA"
     };
 
     if (!req.body.hasOwnProperty("activity")) {
@@ -15,21 +39,12 @@ router.post('/pulse', function(req, res, next) {
         responseJson.message = "Request missing activities parameter.";
         return res.status(201).send(JSON.stringify(responseJson));
     }
-    console.log(req.body);
-    // for (let a of JSON.parse(req.body.activities)) {
-    //     console.log(a);
-    // }
-    /*
-    { 
-        "k": "bnpCaZYBifkRGX38IPLN7pvfPKO1iMs3",
-        "a": [ 
-            {"n": "0.000000", "t": "0.000000", "s": "0.000000", "u": "65535.000000"} 
-        ] 
-    }
-    */
-    // responseJson.status = "GOOD";
-    // responseJson.message = "activity recieved";
-    // return res.status(201).send(JSON.stringify(responseJson));
+    req.body.activity.pop();
+    console.log("API key: "+req.body.apikey);
+    console.log("Activity: ");
+    console.log(req.body.activity);
+    console.log("Activity size: "+req.body.activity.length);
+    console.log("Activity size in bytes: "+JSON.stringify(req.body.activity).length);
     // // Ensure the POST data include properties id and email
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
@@ -52,12 +67,15 @@ router.post('/pulse', function(req, res, next) {
                 return res.status(201).send(JSON.stringify(responseJson));
             } else {
                 // Create a new hw data with user email time stamp 
+                
+                actType = calculateActivity(req.body.activity);
+                console.log("actType: "+actType);
                 var activity = new Activity({
                     deviceId: req.body.deviceId,
-                    lon: req.body.longitude,
-                    lat: req.body.latitude,
-                    uv: req.body.uv,
-                    speed: req.body.GPS_speed
+                    activity: req.body.activity,
+                    began: req.body.began,
+                    ended: req.body.ended,
+                    activityType: actType
                 });
 
                 // Save device. If successful, return success. If not, return error message.                          
@@ -67,9 +85,14 @@ router.post('/pulse', function(req, res, next) {
                         responseJson.message = "Error saving data in db.";
                         return res.status(201).send(JSON.stringify(responseJson));
                     } else {
-                        responseJson.status = "OK";
-                        responseJson.message = "Data saved in db with object ID " + run._id + ".";
-                        return res.status(201).send(JSON.stringify(responseJson));
+                        User.findOne({userDevices: req.body.deviceId},(err, user)=>{
+                            //console.log(user);
+                            responseJson.uvThreshold = user.uvThreshold;
+                            responseJson.status = "OK";
+                            responseJson.message = "Data saved in db with object ID " + run._id + ".";
+                            return res.status(201).send(JSON.stringify(responseJson));
+                        })
+                        
                     }
                 });
             }
@@ -79,6 +102,15 @@ router.post('/pulse', function(req, res, next) {
             return res.status(201).send(JSON.stringify(responseJson));
         }
     });
+});
+
+router.get('/threshold', (req,res)=>{
+    console.log("deviceId of requesting thresh: "+req.query.coreid);
+    User.findOne({ userDevices: req.query.coreid }, (err, user)=>{
+        if(user !== null){
+            return res.status(200).send(JSON.stringify(user.uvThreshold));
+        }
+    })
 });
 
 module.exports = router;

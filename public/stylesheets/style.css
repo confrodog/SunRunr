@@ -1,8 +1,13 @@
-body {
-  padding: 50px;
-  font: 14px "Roboto", Helvetica, Arial, sans-serif;
+
+.collapsible-header{
+  position: relative;
 }
 
-a {
-  color: #00B7FF;
+.collapsible-secondary{
+  position: absolute;
+  right: 0;
 }
+h6.card-title{
+  font-size: 18px !important;
+}
+ 
