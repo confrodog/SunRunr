@@ -60,7 +60,7 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     //beginning of the transmission
-    if (req.body.hasOwnProperty("continue") && !req.body.hasOwnProperty("activityId")) {
+    if (req.body.continue && !req.body.activityId) {
         console.log("transmission of an activity has began...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -88,7 +88,7 @@ router.post('/pulse', function(req, res, next) {
                                 responseJson.uvThreshold = user.uvThreshold;
                                 responseJson.activityId = activity._id;
                                 responseJson.status = "OK";
-                                responseJson.message = "Data saved in db with object ID " + activity._id + ".";
+                                responseJson.message = "Activity " + activity._id +" has began.";
                                 return res.status(201).send(JSON.stringify(responseJson));
                             })
                         }
@@ -102,7 +102,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //continuing transmission
-    else if (req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (req.body.continue && req.body.activityId) {
         console.log("transmission of an activity is continuing...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -123,7 +123,7 @@ router.post('/pulse', function(req, res, next) {
                                 responseJson.uvThreshold = user.uvThreshold;
                                 responseJson.activityId = activity._id;
                                 responseJson.status = "OK";
-                                responseJson.message = "Data saved in db with object ID " + activity._id + ".";
+                                responseJson.message = "Activity "+ activity._id +" is in progress.";
                                 return res.status(201).send(JSON.stringify(responseJson));
                             })
 
@@ -138,7 +138,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //ending transmission
-    else if (!req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (!req.body.continue && req.body.activityId) {
         console.log("transmission of an activity has ended...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -163,7 +163,7 @@ router.post('/pulse', function(req, res, next) {
                                     responseJson.uvThreshold = user.uvThreshold;
                                     responseJson.activityId = activity._id;
                                     responseJson.status = "OK";
-                                    responseJson.message = "Data saved in db with object ID " + activity._id + ".";
+                                    responseJson.message = "Activity "+ activity._id +" has ended.";
                                     return res.status(201).send(JSON.stringify(responseJson));
                                 });
                             }
@@ -176,48 +176,52 @@ router.post('/pulse', function(req, res, next) {
             }
         });
     }
-    // Find the device and verify the apikey
-    Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
-        if (device !== null) {
-            if (device.apikey != req.body.apikey) {
-                responseJson.status = "ERROR";
-                responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
-                return res.status(201).send(JSON.stringify(responseJson));
-            } else {
-                actType = calculateActivity(req.body.activity);
-                console.log("actType: " + actType);
-                var activity = new Activity({
-                    deviceId: req.body.deviceId,
-                    activity: req.body.activity,
-                    began: req.body.began,
-                    ended: req.body.ended,
-                    activityType: actType
-                });
-
-                // Save device. If successful, return success. If not, return error message.                          
-                activity.save(function(err, run) {
-                    if (err) {
-                        responseJson.status = "ERROR";
-                        responseJson.message = "Error saving data in db.";
-                        return res.status(201).send(JSON.stringify(responseJson));
-                    } else {
-                        User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                            //console.log(user);
-                            responseJson.uvThreshold = user.uvThreshold;
-                            responseJson.status = "OK";
-                            responseJson.message = "Data saved in db with object ID " + run._id + ".";
+    else{
+        console.log("posting if all else case...")
+        Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
+            if (device !== null) {
+                if (device.apikey != req.body.apikey) {
+                    responseJson.status = "ERROR";
+                    responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
+                    return res.status(201).send(JSON.stringify(responseJson));
+                } else {
+                    actType = calculateActivity(req.body.activity);
+                    console.log("actType: " + actType);
+                    var activity = new Activity({
+                        deviceId: req.body.deviceId,
+                        activity: req.body.activity,
+                        began: req.body.began,
+                        ended: req.body.ended,
+                        activityType: actType
+                    });
+    
+                    // Save device. If successful, return success. If not, return error message.                          
+                    activity.save(function(err, run) {
+                        if (err) {
+                            responseJson.status = "ERROR";
+                            responseJson.message = "Error saving data in db.";
                             return res.status(201).send(JSON.stringify(responseJson));
-                        })
-
-                    }
-                });
+                        } else {
+                            User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                                //console.log(user);
+                                responseJson.uvThreshold = user.uvThreshold;
+                                responseJson.status = "OK";
+                                responseJson.message = "Single data saved in db with object ID " + run._id + ".";
+                                return res.status(201).send(JSON.stringify(responseJson));
+                            })
+    
+                        }
+                    });
+                }
+            } else {
+                responseJson.status = "ERROR";
+                responseJson.message = "Device ID " + req.body.deviceId + " not registered.";
+                return res.status(201).send(JSON.stringify(responseJson));
             }
-        } else {
-            responseJson.status = "ERROR";
-            responseJson.message = "Device ID " + req.body.deviceId + " not registered.";
-            return res.status(201).send(JSON.stringify(responseJson));
-        }
-    });
+        });
+    }
+    // Find the device and verify the apikey
+    
 });
 
 router.get('/threshold', (req, res) => {
