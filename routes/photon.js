@@ -13,13 +13,13 @@ function calculateActivity(activity){
     speed /= activity.length;
     console.log("average speed: "+speed);
     if(speed <= 2){
-        return "walking";
+        return "walk";
     }
     else if(speed > 2 && speed <=4){
-        return "running";
+        return "run";
     }
     else if(speed > 4){
-        return "biking";
+        return "bike";
     }
     else{
         return ""+speed;
