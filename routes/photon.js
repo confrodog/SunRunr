@@ -60,7 +60,7 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     //beginning of the transmission
-    if (req.body.continue && !req.body.activityId) {
+    if (req.body.hasOwnProperty("continue") && !req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity has began...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -102,7 +102,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //continuing transmission
-    else if (req.body.continue && req.body.activityId) {
+    else if (req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity is continuing...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -138,7 +138,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //ending transmission
-    else if (!req.body.continue && req.body.activityId) {
+    else if (!req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity has ended...");
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -185,8 +185,8 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    actType = calculateActivity(req.body.activity);
-                    console.log("actType: " + actType);
+                    //actType = calculateActivity(req.body.activity);
+                    //console.log("actType: " + actType);
                     var activity = new Activity({
                         deviceId: req.body.deviceId,
                         activity: req.body.activity,
