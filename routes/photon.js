@@ -4,25 +4,40 @@ var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
-//gonna move this function to route where the activities are called for////////////////////////////
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//input: activity
+//output: speed and activity type
 function calculateActivity(activity) {
     let speed = 0.0;
+    let actType = "";
     for (a of activity) {
         speed += parseFloat(a.speed);
     }
     console.log("total speed: " + speed);
     speed /= activity.length;
     console.log("average speed: " + speed);
-    if (speed <= 2) {
-        return "walking";
-    } else if (speed > 2 && speed <= 4) {
-        return "running";
-    } else if (speed > 4) {
-        return "biking";
+    if (speed <= 4) {
+        actType = "walking";
+    } else if (speed > 4 && speed <= 8) {
+        actType =  "running";
+    } else if (speed > 8) {
+        actType =  "biking";
     } else {
-        return "" + speed;
+        actType =  ""
     }
+    return [speed,actType];
+}
+
+//input: activity
+//output: UV index for the activity
+
+function calculateUVIndex(activity){
+    let avgUV = 0.0;
+    for(a of activity){
+        avgUV += a.uv;
+    }
+    avgUV /= activity.length;
+    return avgUV;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,12 +57,7 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     req.body.activity.pop();
-    console.log("API key: " + req.body.apikey);
-    console.log("Activity: ");
-    console.log(req.body.activity);
-    console.log("Activity size: " + req.body.activity.length);
-    console.log("Activity size in bytes: " + JSON.stringify(req.body.activity).length);
-    // // Ensure the POST data include properties id and email
+    // Ensure the POST data include properties id and api key
     if (!req.body.hasOwnProperty("deviceId")) {
         responseJson.status = "ERROR";
         responseJson.message = "Request missing deviceId parameter.";
@@ -62,6 +72,7 @@ router.post('/pulse', function(req, res, next) {
     //beginning of the transmission
     if (req.body.hasOwnProperty("continue") && !req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity has began...");
+        //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
                 if (device.apikey != req.body.apikey) {
@@ -69,8 +80,7 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    //actType = calculateActivity(req.body.activity);
-                    //console.log("actType: " + actType);
+                    //create new activity
                     var activity = new Activity({
                         deviceId: req.body.deviceId,
                         activity: req.body.activity
@@ -83,6 +93,7 @@ router.post('/pulse', function(req, res, next) {
                             responseJson.message = "Error saving data in db.";
                             return res.status(201).send(JSON.stringify(responseJson));
                         } else {
+                            //return uvThreshold and activity Id to photon
                             User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
                                 //console.log(user);
                                 responseJson.uvThreshold = user.uvThreshold;
@@ -104,6 +115,7 @@ router.post('/pulse', function(req, res, next) {
     //continuing transmission
     else if (req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity is continuing...");
+        //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
                 if (device.apikey != req.body.apikey) {
@@ -111,13 +123,14 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    // Save device. If successful, return success. If not, return error message.                          
+                    // Find activity by _id and add more locations to activity array                        
                     Activity.findOneAndUpdate({ _id: req.body.activityId }, { $push: { activity: req.body.activity } }, function(err, activity) {
                         if (err) {
                             responseJson.status = "ERROR";
                             responseJson.message = "Error saving data in db.";
                             return res.status(201).send(JSON.stringify(responseJson));
                         } else {
+                            //return uvThreshold and activity Id to photon
                             User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
                                 //console.log(user);
                                 responseJson.uvThreshold = user.uvThreshold;
@@ -140,6 +153,7 @@ router.post('/pulse', function(req, res, next) {
     //ending transmission
     else if (!req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
         console.log("transmission of an activity has ended...");
+        //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
                 if (device.apikey != req.body.apikey) {
@@ -147,7 +161,7 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    // Save device. If successful, return success. If not, return error message.                          
+                    // find activity with given _id, add final activity locations and add began, ended values                          
                     Activity.findOneAndUpdate({ _id: req.body.activityId }, {
                             $push: { activity: req.body.activity },
                             $set: { began: req.body.began, ended: req.body.ended }
@@ -158,14 +172,21 @@ router.post('/pulse', function(req, res, next) {
                                 responseJson.message = "Error saving data in db.";
                                 return res.status(201).send(JSON.stringify(responseJson));
                             } else {
-                                User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                                    //console.log(user);
-                                    responseJson.uvThreshold = user.uvThreshold;
-                                    responseJson.activityId = activity._id;
-                                    responseJson.status = "OK";
-                                    responseJson.message = "Activity "+ activity._id +" has ended.";
-                                    return res.status(201).send(JSON.stringify(responseJson));
-                                });
+                                //calculate avgUV and avgSpeed and add those fields
+                                let totalAct = activity.activity.concat(req.body.activity);
+                                let avgUV = calculateUVIndex(totalAct);
+                                let avgSpeed = calculateActivity(totalAct);
+                                activity.update({ $set: {activityType:avgSpeed[1],averageSpeed:avgSpeed[0],uvIndex:avgUV}},()=>{
+                                    //return uvThreshold and activity Id to photon
+                                    User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                                        responseJson.uvThreshold = user.uvThreshold;
+                                        responseJson.activityId = activity._id;
+                                        responseJson.status = "OK";
+                                        responseJson.message = "Activity "+ activity._id +" has ended.";
+                                        return res.status(201).send(JSON.stringify(responseJson));
+                                    });
+                                })
+                                
                             }
                         });
                 }
@@ -177,6 +198,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     else{
+        //route if activity <= 5 locations i.e. 75 seconds
         console.log("posting if all else case...")
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
             if (device !== null) {
@@ -220,10 +242,9 @@ router.post('/pulse', function(req, res, next) {
             }
         });
     }
-    // Find the device and verify the apikey
-    
 });
 
+//not needed
 router.get('/threshold', (req, res) => {
     console.log("deviceId of requesting thresh: " + req.query.coreid);
     User.findOne({ userDevices: req.query.coreid }, (err, user) => {

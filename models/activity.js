@@ -15,6 +15,8 @@ var activitySchema = new db.Schema({
     began: Number,
     ended: Number,
     activityType: String,
+    averageSpeed: Number,
+    uvIndex: Number,
     submitTime: { type: Date, default: Date.now }
 });
 
