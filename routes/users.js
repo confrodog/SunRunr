@@ -220,6 +220,14 @@ router.get('/activities', (req, res) => {
     } catch (ex) {
         return res.status(401).json({ success: false, message: "Invalid authentication token." });
     }
-})
+});
+
+/* Change Activity Type*/
+router.post('/changeActivityType', function(req, res, next) {
+    var id = req.body.id;
+    var value = req.body.actType;
+    
+    
+});
 
 module.exports = router;

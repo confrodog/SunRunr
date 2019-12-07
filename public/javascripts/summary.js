@@ -98,7 +98,7 @@ function sum7days(acts){
     var e = new Date(0);
     e.setUTCSeconds(a.ended);
     var dur = a.ended - a.began;
-    //if(b >= last){
+    if(b >= last){
       totActDuration += (dur);
       if(a.activityType == 'walk'){
         totCalBurned += 344 * (dur%86400)/3600;
@@ -112,7 +112,7 @@ function sum7days(acts){
       for(var u of a.activity){
         totUV += u.uv;
       }
-    //}
+    }
   }
 
   //console.log(totUV);
@@ -232,7 +232,18 @@ function populateDeviceActivity(){
     collap();
     $('.activityType').change(function(e){
       var id = e.target.id;
-      //CHANGE ON DATABASE ON ID
+      var val = this.value;
+      $.ajax({
+        url: '/users/changeActivityType',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({id:id, actType: val}),
+        dataType: 'json',
+        success: function(){
+          alert("success");
+        }
+      })
+      
     });
   })
 }
