@@ -1,9 +1,14 @@
 var express = require('express');
+var request = require('request');
+var fs = require('fs');
 var router = express.Router();
 var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
+var apikey = fs.readFileSync(__dirname+'/../../weatherAPI.txt');
+
+// helpers
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //input: activity
 //output: speed and activity type
@@ -17,11 +22,11 @@ function calculateActivity(activity) {
     speed /= activity.length;
     console.log("average speed: " + speed);
     if (speed <= 4) {
-        actType = "walking";
+        actType = "walk";
     } else if (speed > 4 && speed <= 8) {
-        actType =  "running";
+        actType =  "run";
     } else if (speed > 8) {
-        actType =  "biking";
+        actType =  "bike";
     } else {
         actType =  ""
     }
@@ -80,28 +85,38 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    //create new activity
-                    var activity = new Activity({
-                        deviceId: req.body.deviceId,
-                        activity: req.body.activity
-                    });
-
-                    // Save device. If successful, return success. If not, return error message.                          
-                    activity.save(function(err, activity) {
-                        if (err) {
-                            responseJson.status = "ERROR";
-                            responseJson.message = "Error saving data in db.";
-                            return res.status(201).send(JSON.stringify(responseJson));
-                        } else {
-                            //return uvThreshold and activity Id to photon
-                            User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                                //console.log(user);
-                                responseJson.uvThreshold = user.uvThreshold;
-                                responseJson.activityId = activity._id;
-                                responseJson.status = "OK";
-                                responseJson.message = "Activity " + activity._id +" has began.";
-                                return res.status(201).send(JSON.stringify(responseJson));
-                            })
+                    // call openweatherapi to get temperature and humidity
+                    let url = `http://api.openweathermap.org/data/2.5/weather?`+
+                            `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
+                    request(url,(err, response, body)=>{
+                        if(err)console.log(err);
+                        else{
+                            let weather = JSON.parse(body);
+                            //create new activity with temp and humidity
+                            var activity = new Activity({
+                                deviceId: req.body.deviceId,
+                                activity: req.body.activity,
+                                temp: weather.main.temp,
+                                humidity: weather.main.humidity
+                            });
+                            // Save device. If successful, return success. If not, return error message.    
+                            activity.save(function(err, activity) {
+                                if (err) {
+                                    responseJson.status = "ERROR";
+                                    responseJson.message = "Error saving data in db.";
+                                    return res.status(201).send(JSON.stringify(responseJson));
+                                } else {
+                                    //return uvThreshold and activity Id to photon
+                                    User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                                        //console.log(user);
+                                        responseJson.uvThreshold = user.uvThreshold;
+                                        responseJson.activityId = activity._id;
+                                        responseJson.status = "OK";
+                                        responseJson.message = "Activity " + activity._id +" has began.";
+                                        return res.status(201).send(JSON.stringify(responseJson));
+                                    });
+                                }
+                            });
                         }
                     });
                 }
@@ -207,33 +222,44 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
-                    //actType = calculateActivity(req.body.activity);
-                    //console.log("actType: " + actType);
-                    var activity = new Activity({
-                        deviceId: req.body.deviceId,
-                        activity: req.body.activity,
-                        began: req.body.began,
-                        ended: req.body.ended,
-                        activityType: actType
-                    });
+                    let url = `http://api.openweathermap.org/data/2.5/weather?`+
+                            `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
+                    request(url,(err, response, body)=>{
+                        if(err)console.log(err);
+                        else{
+                            let weather = JSON.parse(body);
+                            actType = calculateActivity(req.body.activity);
+                            uvIndex = calculateUVIndex(req.body.activity);
+                            var activity = new Activity({
+                                deviceId: req.body.deviceId,
+                                activity: req.body.activity,
+                                began: req.body.began,
+                                ended: req.body.ended,
+                                activityType: actType[1],
+                                avgSpeed: actType[0],
+                                uvIndex: uvIndex,
+                                temp: weather.main.temp,
+                                humidity: weather.main.humidity
+                            });
     
-                    // Save device. If successful, return success. If not, return error message.                          
-                    activity.save(function(err, run) {
-                        if (err) {
-                            responseJson.status = "ERROR";
-                            responseJson.message = "Error saving data in db.";
-                            return res.status(201).send(JSON.stringify(responseJson));
-                        } else {
-                            User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                                //console.log(user);
-                                responseJson.uvThreshold = user.uvThreshold;
-                                responseJson.status = "OK";
-                                responseJson.message = "Single data saved in db with object ID " + run._id + ".";
-                                return res.status(201).send(JSON.stringify(responseJson));
-                            })
-    
+                            // Save device. If successful, return success. If not, return error message.                          
+                            activity.save(function(err, activity) {
+                                if (err) {
+                                    responseJson.status = "ERROR";
+                                    responseJson.message = "Error saving data in db.";
+                                    return res.status(201).send(JSON.stringify(responseJson));
+                                } else {
+                                    User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                                        //console.log(user);
+                                        responseJson.uvThreshold = user.uvThreshold;
+                                        responseJson.status = "OK";
+                                        responseJson.message = "Single data saved in db with object ID " + activity._id + ".";
+                                        return res.status(201).send(JSON.stringify(responseJson));
+                                    });
+                                }
+                            });//end save activity
                         }
-                    });
+                    });//end request
                 }
             } else {
                 responseJson.status = "ERROR";
@@ -242,7 +268,7 @@ router.post('/pulse', function(req, res, next) {
             }
         });
     }
-});
+});//end callback hell
 
 //not needed
 router.get('/threshold', (req, res) => {
