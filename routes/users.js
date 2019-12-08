@@ -32,12 +32,13 @@ router.post('/signin', function(req, res, next) {
     });
 });
 
-// Update the name/password for a user (I tried making a PUT but it didn't work?)
+// Update the name/password/UVindex for a user 
 router.put('/update', function(req, res, next) {
     let password = req.body.password;
     let email = req.body.email;
     let fullName = req.body.fullName;
     let uvThreshold = req.body.uvThreshold;
+    let location = req.body.location;
 
     console.log(req.body);
 
@@ -45,6 +46,7 @@ router.put('/update', function(req, res, next) {
         "nameChanged": false,
         "passwordChanged": false,
         "uvChanged": false,
+        "locationChanged": false,
         "success": false,
         "message": ''
     }
@@ -59,12 +61,30 @@ router.put('/update', function(req, res, next) {
         }
     });
 
+    if (location) {
+        console.log("getting in this conditional!!!!!!!!!!!!!!!!!!!!");
+        $.ajax({
+            url: 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json',
+            type: 'GET',
+            dataType: 'json'
+          })
+            .done(function(data, textSatus, jqXHR) {
+                console.log(data);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown){
+                console.log("we have failed the get");
+                responseJson = {success: false, message: status.message}
+            });
+    }
+
     const updateName = User.findOneAndUpdate({ email: email} ,{ fullName: fullName});
 
     const updateUVThreshold = User.findOneAndUpdate({email: email},{uvThreshold: uvThreshold});
 
+    // const updateLocation = User.findOneAndUpdate({ email: email }, {});
+
     // If no password or full name given, update nothing
-    if (!password && !fullName && !uvThreshold) {
+    if (!password && !fullName && !uvThreshold && !location) {
         res.status(201).json({ success: true, message: "Nothing has been updated!"});
         return;
     }
@@ -90,6 +110,13 @@ router.put('/update', function(req, res, next) {
         responseJson.success = true;
         responseJson.message ="uvThreshold has been updated";
         promiseArray.push(updateUVThreshold);
+    }
+    if(location){
+        console.log("changing location");
+        responseJson.locationChanged = true;
+        responseJson.success = true;
+        responseJson.message = "location has been updated";
+        promiseArray.push(updateLocation);
     }
     console.log("Promise Array:");
     console.log(promiseArray.length);
@@ -147,6 +174,9 @@ router.get("/account", function(req, res) {
                 userStatus['fullName'] = user.fullName;
                 userStatus['lastAccess'] = user.lastAccess;
                 userStatus['uvThreshold'] = user.uvThreshold;
+                userStatus['latitude'] = user.latitude;
+                userStatus['longitude'] = user.longitude;
+                userStatus['location'] = user.location;
 
                 // Find devices based on decoded token
                 Device.find({ userEmail: decodedToken.email }, function(err, devices) {
