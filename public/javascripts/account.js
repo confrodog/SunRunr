@@ -201,10 +201,7 @@ function validateSuccess(data, textSatus, jqXHR) {
     if(returnedData.uvChanged){
       $('#uvThreshold').html($('#uvThresholdEdit').val());
     }
-    if(returnedData.locationChaged){
-      $('#location').html($('#locationEdit').val());
-    }
-    $('#editErrors').html("Success! " + returnedData.locationChange);
+    $('#editErrors').html("Success! " + returnedData.message);
     $('#editErrors').show();
     hideEditAccount()
   }).fail(function(jqXHR) {

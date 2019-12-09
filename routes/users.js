@@ -6,6 +6,7 @@ let Activity = require("../models/activity");
 let fs = require('fs');
 let bcrypt = require("bcryptjs");
 let jwt = require("jwt-simple");
+let https = require('https');
 
 /* Authenticate user */
 var secret = fs.readFileSync(__dirname + '/../../jwtkey.txt').toString();
@@ -39,6 +40,8 @@ router.put('/update', function(req, res, next) {
     let fullName = req.body.fullName;
     let uvThreshold = req.body.uvThreshold;
     let location = req.body.location;
+    let lat = 0;
+    let lon = 0;
 
     console.log(req.body);
 
@@ -61,27 +64,36 @@ router.put('/update', function(req, res, next) {
         }
     });
 
-    if (location) {
-        console.log("getting in this conditional!!!!!!!!!!!!!!!!!!!!");
-        $.ajax({
-            url: 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json',
-            type: 'GET',
-            dataType: 'json'
-          })
-            .done(function(data, textSatus, jqXHR) {
-                console.log(data);
-            })
-            .fail(function(jqXHR, textStatus, errorThrown){
-                console.log("we have failed the get");
-                responseJson = {success: false, message: status.message}
+    const getLocation = new Promise(function(resolve, reject) {
+        let url = 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json';
+        console.log("Trying to get an API response");
+
+        https.get(url, (resp) => {
+            let data = '';
+
+            resp.on('data', (chunk) => {
+                data += chunk;
             });
-    }
+
+            resp.on('end', () => {
+                let json = JSON.parse(data);
+                lat = json[0]["lat"];
+                lon = json[0]["lon"];
+                location = json[0]["display_name"];
+
+                User.findOneAndUpdate({ email: email }, {location: location, latitude: lat, longitude: lon})
+                    .then(result => resolve("Updated the database"))
+                    .catch(err => reject(err))
+            });
+        }).on("error", (err) => {
+            responseJson = {success: false, message: err.message}
+            reject(Error("It broke"));
+        }); 
+      });
 
     const updateName = User.findOneAndUpdate({ email: email} ,{ fullName: fullName});
 
     const updateUVThreshold = User.findOneAndUpdate({email: email},{uvThreshold: uvThreshold});
-
-    // const updateLocation = User.findOneAndUpdate({ email: email }, {});
 
     // If no password or full name given, update nothing
     if (!password && !fullName && !uvThreshold && !location) {
@@ -116,7 +128,7 @@ router.put('/update', function(req, res, next) {
         responseJson.locationChanged = true;
         responseJson.success = true;
         responseJson.message = "location has been updated";
-        promiseArray.push(updateLocation);
+        promiseArray.push(getLocation);
     }
     console.log("Promise Array:");
     console.log(promiseArray.length);
