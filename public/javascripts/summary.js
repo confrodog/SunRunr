@@ -1,6 +1,44 @@
 var weekdays = ["Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Augu", "Sep", "Oct", "Nov", "Dec"];
-$(document).ready(function(){
+var long = 0;
+var lat = 0;
+
+function getUserInfo() {
+  $.ajax({
+    url: '/users/account',
+    type: 'GET',
+    headers: { 'x-auth': window.localStorage.getItem("authToken") },
+    dataType: 'json'
+  })
+    .done((data, textSatus, jqXHR) => {
+      long = data.longitude;
+      lat = data.latitude;
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+      console.log("Failed to get User Information");
+    });
+  }
+
+function getUVIndex() {
+  var dt = $('#dt').val();
+ 
+  $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    beforeSend: function(request) {
+      request.setRequestHeader('x-access-token', '661bce55d3b38e9e58c4a4507c0ec01f');
+    },
+    url: 'https://api.openuv.io/api/v1/uv?lat=' + lat + '&lng=' + long + '&dt=' + dt,
+    success: function(response) {
+      //handle successful response
+    },
+    error: function(response) {
+      console.log("Failed to get UV information");
+    }
+  });
+ }
+
+ function populateWeather() {
   $('#main').show();  
   $('.collapsible').collapsible();
   $.ajax({
@@ -34,7 +72,15 @@ $(document).ready(function(){
         $('#fc_' + i).find('.fcdate').html(months[allfc[i].month] + " " + allfc[i].day + ", " + allfc[i].year);
         $('#fc_' + i).find('.fctemp').html(allfc[i].temp.toFixed(2) + '&#8457;');
       }
+    },
+    error: function(response) {
+      console.log("Failed to get weather information");
     }
-  })
-  .fail(console.log("FAIL"));
+  });
+ }
+
+
+$(document).ready(function(){
+  getUserInfo();
+  populateWeather();
 });
