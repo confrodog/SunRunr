@@ -33,7 +33,7 @@ function getUVIndex() {
       //handle successful response
     },
     error: function(response) {
-      // handle error response
+      console.log("Failed to get UV information");
     }
   });
  }
@@ -74,7 +74,7 @@ function getUVIndex() {
       }
     },
     error: function(response) {
-      console.log("FAIL");
+      console.log("Failed to get weather information");
     }
   });
  }
