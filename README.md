@@ -18,12 +18,12 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] User should use a button on the IoT device to **start** and **stop** activities.
  - [X] IoT shall use **onboard** LEDs to indicate activity status.
  - [X] During an activity, the IoT device should periodically record the GPS location, speed, and UV exposure, at least at a rate of **once every 15 seconds.**
- - [ ] (CONNOR) If the UV exposure during an activity **exceeds** a user-defined
+ - [x] If the UV exposure during an activity **exceeds** a user-defined
        threshold (the threshold will be set in the web application), an
        **alert should be provided** on the IoT device.
  - [x] After an activity is complete, the IoT device should **transmit the
        activity data to the server**.
- - [ ] (CONNOR) If the WiFi connection is **not available**, the IoT device should
+ - [x] If the WiFi connection is **not available**, the IoT device should
        **locally store the data** for up to **24 hours** and submit the data
        when later connected.
  - [ ] (CONNOR) The IoT device should have an auto-pause feature: During an
@@ -53,12 +53,12 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
        672 - runnning
        600 - biking
 
- - [ ] (MEL) The web application should allow the user to **define a UV
+ - [X] (MEL) The web application should allow the user to **define a UV
        threshold** that defines the total UV exposure beyond which the IoT
        device should alert the user during an activity. The alert can be
        a simple as illuminating an LED. This setting should be made
        in the account profile page.
- - [ ] (MIRANDA/MEL) The web application should include a weather forecast including
+ - [X] (MIRANDA/MEL) The web application should include a weather forecast including
        UV index for at least the **next five days**. Your server should
        use a third-party API to acquire this information.
  - [x] The web application should have a **navigation menu**.
@@ -68,7 +68,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] When an activity is sent to the server by the IoT device, the
        server should assign a default activity type based on the speed
        data.
- - [ ] When an activity is sent to the server by the IoT device, the
+ - [x] When an activity is sent to the server by the IoT device, the
        server should use a third-party weather service to determine the
        temperature and humidity at the activity's location, which should
        be stored in the database for the activity.
@@ -80,4 +80,4 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] Access to the web application should be controlled using token
        based authentication.
 ## EXTRAS
- - [ ] add user location through account settings and use that information to show weather
+ - [X] add user location through account settings and use that information to show weather
