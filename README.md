@@ -49,12 +49,12 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
        support **walking**, **running**, and **biking**.
  - [ ] (MIRANDA) The calculation of calories burned should be based on the
        activity type for each activity.
- - [ ] (MEL) The web application should allow the user to **define a UV
+ - [X] (MEL) The web application should allow the user to **define a UV
        threshold** that defines the total UV exposure beyond which the IoT
        device should alert the user during an activity. The alert can be
        a simple as illuminating an LED. This setting should be made
        in the account profile page.
- - [ ] (MIRANDA/MEL) The web application should include a weather forecast including
+ - [X] (MIRANDA/MEL) The web application should include a weather forecast including
        UV index for at least the **next five days**. Your server should
        use a third-party API to acquire this information.
  - [x] The web application should have a **navigation menu**.
@@ -76,4 +76,4 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] Access to the web application should be controlled using token
        based authentication.
 ## EXTRAS
- - [ ] add user location through account settings and use that information to show weather
+ - [X] add user location through account settings and use that information to show weather
