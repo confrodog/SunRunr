@@ -75,7 +75,7 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     //beginning of the transmission
-    if (req.body.hasOwnProperty("continue") && !req.body.hasOwnProperty("activityId")) {
+    if (req.body.continue && !req.body.activityId) {
         console.log("transmission of an activity has began...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -128,7 +128,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //continuing transmission
-    else if (req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (req.body.continue && req.body.activityId) {
         console.log("transmission of an activity is continuing...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -166,7 +166,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //ending transmission
-    else if (!req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (!req.body.continue && req.body.activityId) {
         console.log("transmission of an activity has ended...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
