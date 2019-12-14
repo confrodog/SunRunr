@@ -76,7 +76,7 @@ function populateWeather() {
 	$(".collapsible").collapsible();
 	$.ajax({
 		url:
-			"http://api.openweathermap.org/data/2.5/forecast?lat=32.2328&lon=-110.9607&units=imperial&APPID=1ac5b46230b1f3ae861be919195faa05",
+			"http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + long + "&units=imperial&APPID=1ac5b46230b1f3ae861be919195faa05",
 		type: "GET",
 		dataType: "json",
 		success: function(result) {
@@ -101,8 +101,12 @@ function populateWeather() {
 					cnt = 1;
 				}
 			}
+			console.log("lat:" + lat);
+			console.log("long: " + long);
 			for (i in allfc) {
-        getUVIndex(allfc[i].day, allfc[i].month, allfc[i].year, i);
+				console.log("Remember to uncomment getUVIndex for actual demo!!!!!!!!!!");
+				// TODO: This needs to be uncommented during demo, it will make a request every time it's called so we have it currently commented!
+        //getUVIndex(allfc[i].day, allfc[i].month, allfc[i].year, i);
 				$("#fc_" + i)
 					.find(".fcdate")
 					.html(
