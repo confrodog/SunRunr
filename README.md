@@ -33,7 +33,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] The server should **require an APIKEY** from the IoT device for
        posting activity data.
 ## Web Application
- - [ ] (MIRANDA) A summary view showing the user’s **total activity duration**, total 
+ - [x] (MIRANDA) A summary view showing the user’s **total activity duration**, total 
        **calories burned**, and total **UV exposure** in the past **7 days**.
  - [ ] (MIRANDA) An activities summary view that lists **all fitness activities** with
        data **summarizing each activity**, including the **date of activity**,  
@@ -47,8 +47,12 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [ ] (MIRANDA) In the activity detail view, the web application should allow a
        user to **change the activity type**. Activity types should minimally
        support **walking**, **running**, and **biking**.
- - [ ] (MIRANDA) The calculation of calories burned should be based on the
+ - [x] (MIRANDA) The calculation of calories burned should be based on the
        activity type for each activity.
+       344 - walking
+       672 - runnning
+       600 - biking
+
  - [X] (MEL) The web application should allow the user to **define a UV
        threshold** that defines the total UV exposure beyond which the IoT
        device should alert the user during an activity. The alert can be

@@ -1,4 +1,3 @@
-
 var userEmail = "";
 
 function ShowAcct(){
@@ -6,7 +5,6 @@ function ShowAcct(){
   $('#main').hide();
 }
 
-//------------------------------------------------------------------------------
 function sendReqForAccountInfo() {
   $.ajax({
     url: '/users/account',
