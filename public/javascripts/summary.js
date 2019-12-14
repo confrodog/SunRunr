@@ -328,7 +328,7 @@ function populateWeather() {
 				}
 			}
 			for (i in allfc) {
-        getUVIndex(allfc[i].day, allfc[i].month, allfc[i].year, i);
+        //getUVIndex(allfc[i].day, allfc[i].month, allfc[i].year, i);
 				$("#fc_" + i)
 					.find(".fcdate")
 					.html(
