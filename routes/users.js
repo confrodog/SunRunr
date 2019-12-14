@@ -56,40 +56,59 @@ router.put('/update', function(req, res, next) {
     
     let promiseArray = [];
 
-    const updatePassword = bcrypt.hash(password, 10, function(err, hash) {
-        if (err) {
-            responseJson = {success: false, message: err.errmsg};
-        } else {
-            User.findOneAndUpdate({ email: email }, { passwordHash: hash });
-        }
-    });
-
-    const getLocation = new Promise(function(resolve, reject) {
-        let url = 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json';
-        console.log("Trying to get an API response");
-
-        https.get(url, (resp) => {
-            let data = '';
-
-            resp.on('data', (chunk) => {
-                data += chunk;
+    function updatePassword() {
+        return new Promise(function(resolve, reject) {
+            bcrypt.hash(password, 10, function(err, hash) {
+                if (err) {
+                    responseJson = {success: false, message: err.errmsg};
+                } else {
+                    User.findOneAndUpdate({ email: email }, { passwordHash: hash }, function(err, doc) {
+                        if (err) {
+                            reject(errmsg);
+                        } else if (doc) {
+                            resolve("Updated the password");
+                        }
+                    });
+                }
             });
+        });
+    }
+    
+    function startGetLocation() {
+        return new Promise(function(resolve, reject) {
+            let url = 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json';
+            console.log("Trying to get an API response");
 
-            resp.on('end', () => {
-                let json = JSON.parse(data);
-                lat = json[0]["lat"];
-                lon = json[0]["lon"];
-                location = json[0]["display_name"];
+            https.get(url, (resp) => {
+                let data = '';
 
-                User.findOneAndUpdate({ email: email }, {location: location, latitude: lat, longitude: lon})
-                    .then(result => resolve("Updated the database"))
-                    .catch(err => reject(err))
-            });
-        }).on("error", (err) => {
-            responseJson = {success: false, message: err.message}
-            reject(Error("It broke"));
-        }); 
-      });
+                resp.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                resp.on('end', () => {
+                    let json = JSON.parse(data);
+                    lat = json[0]["lat"];
+                    lon = json[0]["lon"];
+                    location = json[0]["display_name"];
+
+                    console.log(lat);
+                    console.log(lon);
+                    console.log(location);
+                    User.findOneAndUpdate({ email: email }, {location: location, latitude: lat, longitude: lon}, function(err, doc) {
+                        if (err) {
+                            reject(errmsg);
+                        } else if (doc) {
+                            resolve("We have updated everything");
+                        }
+                    });
+                });
+            }).on("error", (err) => {
+                responseJson = {success: false, message: err.message}
+                reject(Error("It broke"));
+            }); 
+        });
+    }
 
     const updateName = User.findOneAndUpdate({ email: email} ,{ fullName: fullName});
 
@@ -106,7 +125,7 @@ router.put('/update', function(req, res, next) {
         responseJson.passwordChanged = true;
         responseJson.success = true;
         responseJson.message = "password has been updated";
-        promiseArray.push(updatePassword);
+        promiseArray.push(updatePassword());
     }
     // If no password given, update the name
     if (fullName) {
@@ -128,12 +147,13 @@ router.put('/update', function(req, res, next) {
         responseJson.locationChanged = true;
         responseJson.success = true;
         responseJson.message = "location has been updated";
-        promiseArray.push(getLocation);
+        promiseArray.push(startGetLocation());
     }
     console.log("Promise Array:");
     console.log(promiseArray.length);
     Promise
     .all(promiseArray).then((values)=>{
+        console.log("all promises are complete");
         return res.status(201).send(responseJson);
     })
     .catch((reason)=>{
