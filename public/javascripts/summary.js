@@ -45,9 +45,10 @@ function createSecDiv(a){
   }
   uvdiv.innerHTML = "<strong>UV Exposure: </strong>" + (uv/ a.activity.length);
   var tempdiv = document.createElement("div");
-  tempdiv.innerHTML = "<strong>Temperature: </strong> 100&#8457;" ;
+  var t = (a.temp - 273.15) * 9/5 + 32;
+  tempdiv.innerHTML = "<strong>Temperature: </strong> " + t.toFixed(2) + "&#8457;" ;
   var humdiv = document.createElement("div");
-  humdiv.innerHTML = "<strong>Humidity: </strong> 341";
+  humdiv.innerHTML = "<strong>Humidity: </strong>" + a.humidity;
   //CALCULATE CALORIES
   sdiv.append(uvdiv);
   sdiv.append(tempdiv);
@@ -55,11 +56,11 @@ function createSecDiv(a){
   return sdiv;
 }
 
-function createContent(a, i){
+function createContent(a){
   var div = document.createElement("div");
   var sel = document.createElement("select");
   sel.name = "activitytype";
-  sel.id = i + "_acttype";
+  sel.id = a.id + "_acttype";
   sel.classList.add("activityType");
   var label = document.createElement("label");
   label.htmlFor = "activitytype";
@@ -123,11 +124,15 @@ function sum7days(acts){
   var hours = Math.floor((sec % 86400) / 3600);
   var min = Math.floor(((sec % 86400) % 3600) / 60);
   var sec = ((sec % 86400) % 3600) % 60;
-  $('#totactdur').html(days + ':' + ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2));
+  var durstring = days != 0? days +":" + ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2):"";
+  durstring = durstring == "" && hours != 0? ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2):"";
+  durstring = durstring == ""? min + ' min ' + sec +' sec':"";
+  
+  
+  $('#totactdur').html(durstring);
   $('#totcalbur').html(Math.round(totCalBurned));
   $('#totuvexp').html(totUV);
   $('.loader').hide();
-  console.log("");
 }
 
 function createChart(a){
@@ -205,12 +210,10 @@ function populateDeviceActivity(){
     dataType: 'json'
   }).done(function(data){
     var d = data.activities;
-    console.log(d);
     sum7days(d);
     for(var a in d){
-      console.log();
       var li = document.createElement("li");
-      li.id = a + "_activity";
+      li.id = d[a].id + "_activity";
       var coldiv = document.createElement("div");
       coldiv.classList.add("collapsible");
       coldiv.classList.add("blue");
@@ -225,7 +228,7 @@ function populateDeviceActivity(){
       coldiv.append(i);
       li.append(coldiv);
       var con = document.createElement("div");
-      con.append(createContent(d[a], a));
+      con.append(createContent(d[a]));
       con.classList.add("content");
       li.append(con);
       $('#activities ul').append(li);
@@ -233,7 +236,7 @@ function populateDeviceActivity(){
     }
     collap();
     $('.activityType').change(function(e){
-      var id = e.target.id;
+      var id = parseInt(e.target.id);
       var val = this.value;
       $.ajax({
         url: '/users/changeActivityType',
@@ -242,7 +245,7 @@ function populateDeviceActivity(){
         data: JSON.stringify({id:id, actType: val}),
         dataType: 'json',
         success: function(){
-          alert("success");
+          window.location.reload();
         }
       })
       
@@ -306,6 +309,7 @@ function populateWeather() {
 		type: "GET",
 		dataType: "json",
 		success: function(result) {
+      console.log(result.list.length);
 			var allfc = [];
 			var d = new Date(result.list[0].dt_txt);
 			var temp = 0;
@@ -327,8 +331,6 @@ function populateWeather() {
 					cnt = 1;
 				}
 			}
-			console.log("lat:" + lat);
-			console.log("long: " + long);
 			for (i in allfc) {
 				console.log("Remember to uncomment getUVIndex for actual demo!!!!!!!!!!");
 				// TODO: This needs to be uncommented during demo, it will make a request every time it's called so we have it currently commented!
@@ -338,14 +340,13 @@ function populateWeather() {
 					.html(
 						months[allfc[i].month] +
 							" " +
-							allfc[i].day +
-							", " +
-							allfc[i].year
+							allfc[i].day
 					);
 				$("#fc_" + i)
 					.find(".fctemp")
 					.html(allfc[i].temp.toFixed(2) + "&#8457;");
-			}
+      }
+      $('.wloader').hide();
 		},
 		error: function(response) {
 			console.log("Failed to get weather information");
@@ -356,5 +357,5 @@ function populateWeather() {
 
 $(document).ready(function() {
   getUserInfo();
-  populateDeviceActivity(); 
+  populateDeviceActivity();
 });

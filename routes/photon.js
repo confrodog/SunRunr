@@ -75,7 +75,7 @@ router.post('/pulse', function(req, res, next) {
         return res.status(201).send(JSON.stringify(responseJson));
     }
     //beginning of the transmission
-    if (req.body.hasOwnProperty("continue") && !req.body.hasOwnProperty("activityId")) {
+    if (req.body.continue && !req.body.activityId) {
         console.log("transmission of an activity has began...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -128,7 +128,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //continuing transmission
-    else if (req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (req.body.continue && req.body.activityId) {
         console.log("transmission of an activity is continuing...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -166,7 +166,7 @@ router.post('/pulse', function(req, res, next) {
         });
     }
     //ending transmission
-    else if (!req.body.hasOwnProperty("continue") && req.body.hasOwnProperty("activityId")) {
+    else if (!req.body.continue && req.body.activityId) {
         console.log("transmission of an activity has ended...");
         //authenticate API key
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -222,6 +222,7 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
+                    apikey = '1ac5b46230b1f3ae861be919195faa05';
                     let url = `http://api.openweathermap.org/data/2.5/weather?`+
                             `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
                     request(url,(err, response, body)=>{
@@ -250,7 +251,6 @@ router.post('/pulse', function(req, res, next) {
                                     return res.status(201).send(JSON.stringify(responseJson));
                                 } else {
                                     User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                                        //console.log(user);
                                         responseJson.uvThreshold = user.uvThreshold;
                                         responseJson.status = "OK";
                                         responseJson.message = "Single data saved in db with object ID " + activity._id + ".";

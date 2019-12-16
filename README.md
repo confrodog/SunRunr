@@ -35,16 +35,16 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
 ## Web Application
  - [x] (MIRANDA) A summary view showing the user’s **total activity duration**, total 
        **calories burned**, and total **UV exposure** in the past **7 days**.
- - [ ] (MIRANDA) An activities summary view that lists **all fitness activities** with
+ - [x] (MIRANDA) An activities summary view that lists **all fitness activities** with
        data **summarizing each activity**, including the **date of activity**,  
        **duration of activity**, **calories burned**, **UV exposure**, **temperature**,
        and **humidity**.
- - [ ] (MIRANDA) An activity detail view for a selected activity that will display
+ - [x] (MIRANDA) An activity detail view for a selected activity that will display
        the **activity date**, **duration**, **UV exposure**, **temperature**,   
        **humidity**, **activity type**, **calories burned**, and uses **line charts**
        to    display the  **speed** and **UV exposure** throughout the
        activity.
- - [ ] (MIRANDA) In the activity detail view, the web application should allow a
+ - [x] (MIRANDA) In the activity detail view, the web application should allow a
        user to **change the activity type**. Activity types should minimally
        support **walking**, **running**, and **biking**.
  - [x] (MIRANDA) The calculation of calories burned should be based on the

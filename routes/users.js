@@ -251,21 +251,25 @@ router.get('/activities', (req, res) => {
                 for (device of devices) {
                     deviceList.push(device.deviceId);
                 }
-                console.log(deviceList);
                 Activity.find({deviceId: {$in: deviceList }}, function(err, activities) {
                     if (err) {
                         console.log("error");
                         return res.status(400).json({ success: false, message: "there is an issue with activity storing." });
                     } else {
+                        console.log("HERE");
                         console.log(activities);
                         for(var a of activities){
                             let ret = {};
+                            ret["id"] = a._id;
                             ret["deviceId"] = a.deviceId;
                             ret["activity"] = a.activity;
                             ret["began"] = a.began;
                             ret["activityType"] = a.activityType;
                             ret["ended"] = a.ended;
                             ret["submit"] = a.submitTime
+                            ret["uvIndex"] = a.uvIndex;
+                            ret["temp"] = a.temp;
+                            ret["humidity"] = a.humidity;
                             console.log(ret);
                             acts["activities"].push(ret);
                         }
@@ -286,9 +290,18 @@ router.get('/activities', (req, res) => {
 
 /* Change Activity Type*/
 router.post('/changeActivityType', function(req, res, next) {
+    console.log("CHANGE ACT TYPE");
     var id = req.body.id;
     var value = req.body.actType;
-    
+    Activity.updateOne({"_id":id}, {$set: {"activityType":value}}, function(err, r){
+        if (err) {
+            console.log("error");
+            return res.status(400).json({ success: false, message: "Changing Activity Type Error" });
+        }
+        else{
+            return res.status(200).json({success: true});
+        }
+    });
     
 });
 
