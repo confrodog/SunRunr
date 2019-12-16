@@ -26,39 +26,39 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] If the WiFi connection is **not available**, the IoT device should
        **locally store the data** for up to **24 hours** and submit the data
        when later connected.
- - [x] (CONNOR) The IoT device should have an auto-pause feature: During an
+ - [x] The IoT device should have an auto-pause feature: During an
        activity if the **user’s speed** is **0** for **more than 30 seconds**, the
        device should **pause the activity data recording** until the user
        starts moving again.
  - [x] The server should **require an APIKEY** from the IoT device for
        posting activity data.
 ## Web Application
- - [x] (MIRANDA) A summary view showing the user’s **total activity duration**, total 
+ - [x] A summary view showing the user’s **total activity duration**, total 
        **calories burned**, and total **UV exposure** in the past **7 days**.
- - [x] (MIRANDA) An activities summary view that lists **all fitness activities** with
+ - [x] An activities summary view that lists **all fitness activities** with
        data **summarizing each activity**, including the **date of activity**,  
        **duration of activity**, **calories burned**, **UV exposure**, **temperature**,
        and **humidity**.
- - [x] (MIRANDA) An activity detail view for a selected activity that will display
+ - [x] An activity detail view for a selected activity that will display
        the **activity date**, **duration**, **UV exposure**, **temperature**,   
        **humidity**, **activity type**, **calories burned**, and uses **line charts**
        to    display the  **speed** and **UV exposure** throughout the
        activity.
- - [x] (MIRANDA) In the activity detail view, the web application should allow a
+ - [x] In the activity detail view, the web application should allow a
        user to **change the activity type**. Activity types should minimally
        support **walking**, **running**, and **biking**.
- - [x] (MIRANDA) The calculation of calories burned should be based on the
+ - [x] The calculation of calories burned should be based on the
        activity type for each activity.
        344 - walking
        672 - runnning
        600 - biking
 
- - [X] (MEL) The web application should allow the user to **define a UV
+ - [X] The web application should allow the user to **define a UV
        threshold** that defines the total UV exposure beyond which the IoT
        device should alert the user during an activity. The alert can be
        a simple as illuminating an LED. This setting should be made
        in the account profile page.
- - [X] (MIRANDA/MEL) The web application should include a weather forecast including
+ - [X] The web application should include a weather forecast including
        UV index for at least the **next five days**. Your server should
        use a third-party API to acquire this information.
  - [x] The web application should have a **navigation menu**.
@@ -80,4 +80,4 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] Access to the web application should be controlled using token
        based authentication.
 ## EXTRAS
- - [X] add user location through account settings and use that information to show weather
+ - [X] Add user location through account settings and use that information to show weather
