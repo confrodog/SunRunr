@@ -26,7 +26,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
  - [x] If the WiFi connection is **not available**, the IoT device should
        **locally store the data** for up to **24 hours** and submit the data
        when later connected.
- - [ ] (CONNOR) The IoT device should have an auto-pause feature: During an
+ - [x] (CONNOR) The IoT device should have an auto-pause feature: During an
        activity if the **user’s speed** is **0** for **more than 30 seconds**, the
        device should **pause the activity data recording** until the user
        starts moving again.
@@ -62,7 +62,7 @@ URL: ec2-52-37-217-169.us-west-2.compute.amazonaws.com:3000
        UV index for at least the **next five days**. Your server should
        use a third-party API to acquire this information.
  - [x] The web application should have a **navigation menu**.
- - [ ] The web application should use **responsive design to be viewable
+ - [x] The web application should use **responsive design to be viewable
        on desktops, tablets, and smartphones.**
 ## Server
  - [x] When an activity is sent to the server by the IoT device, the
