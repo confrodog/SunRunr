@@ -267,32 +267,36 @@ function getUserInfo() {
 		.fail((jqXHR, textStatus, errorThrown) => {
 			console.log("Failed to get User Information");
     })
-    .then(populateWeather);
+    .then(populateWeather)
+    .then(populateUV);
 }
 
-function getUVIndex(day, month, year, i) {
-	var dt = [year, month, day].join('-');
-
+function populateUV() {
+  $.ajax({
+		type: "GET",
+		dataType: "json",
+		url:
+			"http://api.openweathermap.org/data/2.5/uvi?appid=1ac5b46230b1f3ae861be919195faa05&lat=" + lat + "&lon=" + long,
+		success: function(response) {
+      $("#fc_0")
+					.find(".fcuv")
+					.html("UV: " + response.value);
+		},
+		error: function(response) {
+			console.log("Failed to get UV information");
+		}
+	});
 	$.ajax({
 		type: "GET",
 		dataType: "json",
-		beforeSend: function(request) {
-			request.setRequestHeader(
-				"x-access-token",
-				"661bce55d3b38e9e58c4a4507c0ec01f"
-			);
-		},
 		url:
-			"https://api.openuv.io/api/v1/uv?lat=" +
-			lat +
-			"&lng=" +
-			long +
-			"&dt=" +
-			dt,
+			"http://api.openweathermap.org/data/2.5/uvi/forecast?appid=1ac5b46230b1f3ae861be919195faa05&lat=" + lat + "&lon=" + long + "&cnt=3",
 		success: function(response) {
-			$("#fc_" + i)
+      for (i in response) {
+        $("#fc_" + (parseInt(i) + 1))
 					.find(".fcuv")
-					.html(response.result.uv);
+					.html("UV: " + response[i].value);
+      }
 		},
 		error: function(response) {
 			console.log("Failed to get UV information");
@@ -309,7 +313,7 @@ function populateWeather() {
 		type: "GET",
 		dataType: "json",
 		success: function(result) {
-      console.log(result.list.length);
+      //console.log(result.list.length);
 			var allfc = [];
 			var d = new Date(result.list[0].dt_txt);
 			var temp = 0;
@@ -332,9 +336,6 @@ function populateWeather() {
 				}
 			}
 			for (i in allfc) {
-				console.log("Remember to uncomment getUVIndex for actual demo!!!!!!!!!!");
-				// TODO: This needs to be uncommented during demo, it will make a request every time it's called so we have it currently commented!
-        //getUVIndex(allfc[i].day, allfc[i].month, allfc[i].year, i);
 				$("#fc_" + i)
 					.find(".fcdate")
 					.html(
