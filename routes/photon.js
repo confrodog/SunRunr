@@ -146,17 +146,9 @@ router.post('/pulse', function(req, res, next) {
                             return res.status(201).send(JSON.stringify(responseJson));
                         } else {
                             //concatenate activity
-<<<<<<< HEAD
                             activity.activity = activity.activity.concat(req.body.activity);
                             activity.save((err, activity) => {
                                 if (err) {
-=======
-                          activity.activity = activity.activity.concat(req.body.activity);
-                           console.log("Activity:");
-				console.log(activity.activity);
-				activity.save((err,activity)=>{
-                                if(err){
->>>>>>> 60eb31eca15fe92d201a747ece357e618e3b2e4b
                                     responseJson.status = "ERROR";
                                     responseJson.message = "Error saving data in db.2";
                                     return res.status(201).send(JSON.stringify(responseJson));
