@@ -6,7 +6,7 @@ let fs = require('fs');
 let jwt = require("jwt-simple");
 
 /* Authenticate user */
-var secret = fs.readFileSync(__dirname + '\\..\\..\\jwtkey.txt').toString();
+var secret = fs.readFileSync(__dirname + '/../../jwtkey.txt').toString();
 
 // Function to generate a random apikey consisting of 32 characters
 function getNewApikey() {
@@ -99,30 +99,29 @@ router.post('/register', function(req, res, next) {
 
             // Save device. If successful, return success. If not, return error message.
             newDevice.save(function(err, newDevice) {
-                console.log("new device: "+newDevice);
+                console.log("new device: " + newDevice);
                 if (err) {
                     responseJson.message = err;
                     // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
                     return res.status(400).json(responseJson);
                 } else {
-                    User.findOneAndUpdate({email: email},{$push:{userDevices: req.body.deviceId}},(err,user)=>{
+                    User.findOneAndUpdate({ email: email }, { $push: { userDevices: req.body.deviceId } }, (err, user) => {
                         //console.log("user: "+ user);
-                        if(err){
+                        if (err) {
                             responseJson.message = err;
                             // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
                             return res.status(400).json(responseJson);
-                        }
-                        else{
+                        } else {
                             responseJson.registered = true;
                             responseJson.apikey = deviceApikey;
                             responseJson.deviceId = req.body.deviceId;
-                            responseJson.message = "Device ID " + req.body.deviceId + " was registered and added to "+user.email+" list.";
+                            responseJson.message = "Device ID " + req.body.deviceId + " was registered and added to " + user.email + " list.";
                             return res.status(201).json(responseJson);
-                            
+
                         }
-                        
+
                     });
-                    
+
                 }
             });
         }
@@ -164,7 +163,7 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
-router.delete('/remove/:deviceId', (req,res)=>{
+router.delete('/remove/:deviceId', (req, res) => {
     //console.log("deleting device...");
     //console.log(req.params);
     try {
@@ -174,13 +173,13 @@ router.delete('/remove/:deviceId', (req,res)=>{
         responseJson.message = "Invalid authorization token.";
         return res.status(400).json(responseJson);
     }
-    Device.findOneAndRemove({deviceId: req.params.deviceId},(err, device)=>{
+    Device.findOneAndRemove({ deviceId: req.params.deviceId }, (err, device) => {
         //console.log("DEvice email: "+device.userEmail);
         //console.log("removed device "+req.params.deviceId);
-        User.findOneAndUpdate({email:device.userEmail},{$pull:{userDevices: req.params.deviceId}},(err, user)=>{
+        User.findOneAndUpdate({ email: device.userEmail }, { $pull: { userDevices: req.params.deviceId } }, (err, user) => {
             //console.log("User: "+JSON.stringify(user));
             //console.log("removed device from user "+user.email);
-            res.status(202).json({"message": "good", "deviceId": req.params.deviceId});
+            res.status(202).json({ "message": "good", "deviceId": req.params.deviceId });
         });
     });
 });

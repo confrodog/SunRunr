@@ -9,7 +9,7 @@ let jwt = require("jwt-simple");
 let https = require('https');
 
 /* Authenticate user */
-var secret = fs.readFileSync(__dirname + '\\..\\..\\jwtkey.txt').toString();
+var secret = fs.readFileSync(__dirname + '/../../jwtkey.txt').toString();
 
 router.post('/signin', function(req, res, next) {
     User.findOne({ email: req.body.email }, function(err, user) {
@@ -53,14 +53,14 @@ router.put('/update', function(req, res, next) {
         "success": false,
         "message": ''
     }
-    
+
     let promiseArray = [];
 
     function updatePassword() {
         return new Promise(function(resolve, reject) {
             bcrypt.hash(password, 10, function(err, hash) {
                 if (err) {
-                    responseJson = {success: false, message: err.errmsg};
+                    responseJson = { success: false, message: err.errmsg };
                 } else {
                     User.findOneAndUpdate({ email: email }, { passwordHash: hash }, function(err, doc) {
                         if (err) {
@@ -73,10 +73,10 @@ router.put('/update', function(req, res, next) {
             });
         });
     }
-    
+
     function startGetLocation() {
         return new Promise(function(resolve, reject) {
-            let url = 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q='+encodeURI(location)+'&format=json';
+            let url = 'https://us1.locationiq.com/v1/search.php?key=eb122602cf386b&q=' + encodeURI(location) + '&format=json';
             console.log("Trying to get an API response");
 
             https.get(url, (resp) => {
@@ -95,7 +95,7 @@ router.put('/update', function(req, res, next) {
                     console.log(lat);
                     console.log(lon);
                     console.log(location);
-                    User.findOneAndUpdate({ email: email }, {location: location, latitude: lat, longitude: lon}, function(err, doc) {
+                    User.findOneAndUpdate({ email: email }, { location: location, latitude: lat, longitude: lon }, function(err, doc) {
                         if (err) {
                             reject(errmsg);
                         } else if (doc) {
@@ -104,19 +104,19 @@ router.put('/update', function(req, res, next) {
                     });
                 });
             }).on("error", (err) => {
-                responseJson = {success: false, message: err.message}
+                responseJson = { success: false, message: err.message }
                 reject(Error("It broke"));
-            }); 
+            });
         });
     }
 
-    const updateName = User.findOneAndUpdate({ email: email} ,{ fullName: fullName});
+    const updateName = User.findOneAndUpdate({ email: email }, { fullName: fullName });
 
-    const updateUVThreshold = User.findOneAndUpdate({email: email},{uvThreshold: uvThreshold});
+    const updateUVThreshold = User.findOneAndUpdate({ email: email }, { uvThreshold: uvThreshold });
 
     // If no password or full name given, update nothing
     if (!password && !fullName && !uvThreshold && !location) {
-        res.status(201).json({ success: true, message: "Nothing has been updated!"});
+        res.status(201).json({ success: true, message: "Nothing has been updated!" });
         return;
     }
     // If no full name given, update the password
@@ -135,14 +135,14 @@ router.put('/update', function(req, res, next) {
         responseJson.message = "name has been updated";
         promiseArray.push(updateName);
     }
-    if(uvThreshold){
+    if (uvThreshold) {
         console.log("changing uv");
         responseJson.uvChanged = true;
         responseJson.success = true;
-        responseJson.message ="uvThreshold has been updated";
+        responseJson.message = "uvThreshold has been updated";
         promiseArray.push(updateUVThreshold);
     }
-    if(location){
+    if (location) {
         console.log("changing location");
         responseJson.locationChanged = true;
         responseJson.success = true;
@@ -152,13 +152,13 @@ router.put('/update', function(req, res, next) {
     console.log("Promise Array:");
     console.log(promiseArray.length);
     Promise
-    .all(promiseArray).then((values)=>{
-        console.log("all promises are complete");
-        return res.status(201).send(responseJson);
-    })
-    .catch((reason)=>{
-        return res.status(400).send({ reason: 'unknown' });
-    });
+        .all(promiseArray).then((values) => {
+            console.log("all promises are complete");
+            return res.status(201).send(responseJson);
+        })
+        .catch((reason) => {
+            return res.status(400).send({ reason: 'unknown' });
+        });
 });
 
 /* Register a new user */
@@ -252,14 +252,14 @@ router.get('/activities', (req, res) => {
                 for (device of devices) {
                     deviceList.push(device.deviceId);
                 }
-                Activity.find({deviceId: {$in: deviceList }}, function(err, activities) {
+                Activity.find({ deviceId: { $in: deviceList } }, function(err, activities) {
                     if (err) {
                         console.log("error");
                         return res.status(400).json({ success: false, message: "there is an issue with activity storing." });
                     } else {
                         console.log("HERE");
                         console.log(activities);
-                        for(var a of activities){
+                        for (var a of activities) {
                             let ret = {};
                             ret["id"] = a._id;
                             ret["deviceId"] = a.deviceId;
@@ -277,13 +277,13 @@ router.get('/activities', (req, res) => {
                     }
                     console.log(acts);
                     return res.status(200).json(acts);
-                    
+
                 });
-                
+
             }
-            
+
         });
-        
+
     } catch (ex) {
         return res.status(401).json({ success: false, message: "Invalid authentication token." });
     }
@@ -294,16 +294,15 @@ router.post('/changeActivityType', function(req, res, next) {
     console.log("CHANGE ACT TYPE");
     var id = req.body.id;
     var value = req.body.actType;
-    Activity.updateOne({"_id":id}, {$set: {"activityType":value}}, function(err, r){
+    Activity.updateOne({ "_id": id }, { $set: { "activityType": value } }, function(err, r) {
         if (err) {
             console.log("error");
             return res.status(400).json({ success: false, message: "Changing Activity Type Error" });
-        }
-        else{
-            return res.status(200).json({success: true});
+        } else {
+            return res.status(200).json({ success: true });
         }
     });
-    
+
 });
 
 module.exports = router;

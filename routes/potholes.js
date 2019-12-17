@@ -7,7 +7,7 @@ let Device = require("../models/device");
 let User = require("../models/users");
 
 // Secret key for JWT
-let secret = fs.readFileSync(__dirname + '\\..\\..\\jwtkey.txt').toString();
+let secret = fs.readFileSync(__dirname + '/../../jwtkey.txt').toString();
 let authenticateRecentEndpoint = true;
 
 function authenticateAuthToken(req) {
