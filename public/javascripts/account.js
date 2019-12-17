@@ -1,4 +1,3 @@
-
 var userEmail = "";
 
 function ShowAcct(){
@@ -6,7 +5,6 @@ function ShowAcct(){
   $('#main').hide();
 }
 
-//------------------------------------------------------------------------------
 function sendReqForAccountInfo() {
   $.ajax({
     url: '/users/account',
@@ -23,6 +21,9 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   $("#fullName").html(data.fullName);
   $("#lastAccess").html(data.lastAccess);
   $('#uvThreshold').html(data.uvThreshold);
+  $("#latitude").html(data.latitude);
+  $("#longitude").html(data.longitude);
+  $("#location").html(data.location);
   
   // Add the devices to the list before the list item for the add device button (link)
   for (var device of data.devices) {
@@ -187,7 +188,8 @@ function validateSuccess(data, textSatus, jqXHR) {
       email: userEmail,
       password: $('#passwordEdit').val(),
       fullName: $("#fullNameEdit").val(),
-      uvThreshold: $('#uvThresholdEdit').val()
+      uvThreshold: $('#uvThresholdEdit').val(),
+      location: $('#locationEdit').val()
     },
     dataType: "json"
   }).done(function(returnedData) {
