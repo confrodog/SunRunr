@@ -146,8 +146,10 @@ router.post('/pulse', function(req, res, next) {
                             return res.status(201).send(JSON.stringify(responseJson));
                         }else{
                             //concatenate activity
-                            activity.activity.concat(req.body.activity);
-                            activity.save((err,activity)=>{
+                          activity.activity = activity.activity.concat(req.body.activity);
+                           console.log("Activity:");
+				console.log(activity.activity);
+				activity.save((err,activity)=>{
                                 if(err){
                                     responseJson.status = "ERROR";
                                     responseJson.message = "Error saving data in db.2";
@@ -209,7 +211,7 @@ router.post('/pulse', function(req, res, next) {
                             responseJson.message = "Error saving data in db.";
                             return res.status(201).send(JSON.stringify(responseJson));
                         } else {
-                            activity.activity.concat(req.body.activity);
+                            activity.activity = activity.activity.concat(req.body.activity);
                             let totalAct = activity.activity;
                             //let totalAct = activity.activity.concat(req.body.activity);
                             let avgUV = calculateUVIndex(totalAct);
