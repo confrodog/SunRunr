@@ -20,17 +20,6 @@ function calculateActivity(activity) {
     }
     console.log("total speed: " + speed);
     speed /= activity.length;
-<<<<<<< HEAD
-    console.log("average speed: "+speed);
-    if(speed <= 2){
-        return "walk";
-    }
-    else if(speed > 2 && speed <=4){
-        return "run";
-    }
-    else if(speed > 4){
-        return "bike";
-=======
     console.log("average speed: " + speed);
     if (speed <= 4) {
         actType = "walk";
@@ -40,7 +29,6 @@ function calculateActivity(activity) {
         actType =  "bike";
     } else {
         actType =  ""
->>>>>>> 2d9fd83789c4939edc209507175e6ff21392f3b4
     }
     return [speed,actType];
 }
