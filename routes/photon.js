@@ -236,7 +236,7 @@ router.post('/pulse', function(req, res, next) {
                                 began: req.body.began,
                                 ended: req.body.ended,
                                 activityType: actType[1],
-                                avgSpeed: actType[0],
+                                averageSpeed: actType[0],
                                 uvIndex: uvIndex,
                                 temp: weather.main.temp,
                                 humidity: weather.main.humidity
