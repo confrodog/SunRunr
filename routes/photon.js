@@ -6,7 +6,7 @@ var User = require("../models/users");
 var Device = require("../models/device");
 var Activity = require("../models/activity");
 
-var apikey = fs.readFileSync(__dirname+'/../../weatherAPI.txt');
+var apikey = fs.readFileSync(__dirname + '/../../weatherAPI.txt');
 
 // helpers
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,21 +24,21 @@ function calculateActivity(activity) {
     if (speed <= 4) {
         actType = "walk";
     } else if (speed > 4 && speed <= 8) {
-        actType =  "run";
+        actType = "run";
     } else if (speed > 8) {
-        actType =  "bike";
+        actType = "bike";
     } else {
-        actType =  ""
+        actType = ""
     }
-    return [speed,actType];
+    return [speed, actType];
 }
 
 //input: activity
 //output: UV index for the activity
 
-function calculateUVIndex(activity){
+function calculateUVIndex(activity) {
     let avgUV = 0.0;
-    for(a of activity){
+    for (a of activity) {
         avgUV += a.uv;
     }
     avgUV /= activity.length;
@@ -86,11 +86,11 @@ router.post('/pulse', function(req, res, next) {
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
                     // call openweatherapi to get temperature and humidity
-                    let url = `http://api.openweathermap.org/data/2.5/weather?`+
-                            `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
-                    request(url,(err, response, body)=>{
-                        if(err)console.log(err);
-                        else{
+                    let url = `http://api.openweathermap.org/data/2.5/weather?` +
+                        `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
+                    request(url, (err, response, body) => {
+                        if (err) console.log(err);
+                        else {
                             let weather = JSON.parse(body);
                             //create new activity with temp and humidity
                             var activity = new Activity({
@@ -112,7 +112,7 @@ router.post('/pulse', function(req, res, next) {
                                         responseJson.uvThreshold = user.uvThreshold;
                                         responseJson.activityId = activity._id;
                                         responseJson.status = "OK";
-                                        responseJson.message = "Activity " + activity._id +" has began.";
+                                        responseJson.message = "Activity " + activity._id + " has began.";
                                         return res.status(201).send(JSON.stringify(responseJson));
                                     });
                                 }
@@ -139,25 +139,25 @@ router.post('/pulse', function(req, res, next) {
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
                     // Find activity by _id and add more locations to activity array                        
-                    Activity.findOne({ _id: req.body.activityId },(err, activity)=>{
+                    Activity.findOne({ _id: req.body.activityId }, (err, activity) => {
                         if (err) {
                             responseJson.status = "ERROR";
                             responseJson.message = "Error saving data in db.1";
                             return res.status(201).send(JSON.stringify(responseJson));
-                        }else{
+                        } else {
                             //concatenate activity
-                            activity.activity.concat(req.body.activity);
-                            activity.save((err,activity)=>{
-                                if(err){
+                            activity.activity = activity.activity.concat(req.body.activity);
+                            activity.save((err, activity) => {
+                                if (err) {
                                     responseJson.status = "ERROR";
                                     responseJson.message = "Error saving data in db.2";
                                     return res.status(201).send(JSON.stringify(responseJson));
-                                }else{
-                                    User.findOne({userDevices: req.body.deviceId}, (err,user)=>{
+                                } else {
+                                    User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
                                         responseJson.uvThreshold = user.uvThreshold;
                                         responseJson.activityId = activity._id;
                                         responseJson.status = "OK";
-                                        responseJson.message = "Activity "+ activity._id +" is in progress.";
+                                        responseJson.message = "Activity " + activity._id + " is in progress.";
                                         return res.status(201).send(JSON.stringify(responseJson));
                                     });
                                 }
@@ -200,16 +200,15 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.status = "ERROR";
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
-                } 
-                else {
+                } else {
                     // find activity with given _id, add final activity locations and add began, ended values                          
-                    Activity.findOne({ _id: req.body.activityId }, (err,activity)=>{
+                    Activity.findOne({ _id: req.body.activityId }, (err, activity) => {
                         if (err) {
                             responseJson.status = "ERROR";
                             responseJson.message = "Error saving data in db.";
                             return res.status(201).send(JSON.stringify(responseJson));
                         } else {
-                            activity.activity.concat(req.body.activity);
+                            activity.activity = activity.activity.concat(req.body.activity);
                             let totalAct = activity.activity;
                             //let totalAct = activity.activity.concat(req.body.activity);
                             let avgUV = calculateUVIndex(totalAct);
@@ -217,18 +216,19 @@ router.post('/pulse', function(req, res, next) {
                             activity.activityType = avgSpeed[1];
                             activity.averageSpeed = avgSpeed[0];
                             activity.uvIndex = avgUV;
-                            activity.save((err,activity)=>{
-                                if(err){
+                            activity.began = req.body.began;
+                            activity.ended = req.body.ended;
+                            activity.save((err, activity) => {
+                                if (err) {
                                     responseJson.status = "ERROR";
                                     responseJson.message = "Error saving data in db.3";
                                     return res.status(201).send(JSON.stringify(responseJson));
-                                }
-                                else{
+                                } else {
                                     User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
                                         responseJson.uvThreshold = user.uvThreshold;
                                         responseJson.activityId = activity._id;
                                         responseJson.status = "OK";
-                                        responseJson.message = "Activity "+ activity._id +" has ended.";
+                                        responseJson.message = "Activity " + activity._id + " has ended.";
                                         return res.status(201).send(JSON.stringify(responseJson));
                                     });
                                 }
@@ -268,8 +268,7 @@ router.post('/pulse', function(req, res, next) {
                 return res.status(201).send(JSON.stringify(responseJson));
             }
         });
-    }
-    else{
+    } else {
         //route if activity <= 5 locations i.e. 75 seconds
         console.log("posting if all else case...")
         Device.findOne({ deviceId: req.body.deviceId }, function(err, device) {
@@ -280,11 +279,11 @@ router.post('/pulse', function(req, res, next) {
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
                     apikey = '1ac5b46230b1f3ae861be919195faa05';
-                    let url = `http://api.openweathermap.org/data/2.5/weather?`+
-                            `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
-                    request(url,(err, response, body)=>{
-                        if(err)console.log(err);
-                        else{
+                    let url = `http://api.openweathermap.org/data/2.5/weather?` +
+                        `lat=${req.body.activity[0].lat}&lon=${req.body.activity[0].lon}&appid=${apikey}`;
+                    request(url, (err, response, body) => {
+                        if (err) console.log(err);
+                        else {
                             let weather = JSON.parse(body);
                             actType = calculateActivity(req.body.activity);
                             uvIndex = calculateUVIndex(req.body.activity);
@@ -299,7 +298,7 @@ router.post('/pulse', function(req, res, next) {
                                 temp: weather.main.temp,
                                 humidity: weather.main.humidity
                             });
-    
+
                             // Save device. If successful, return success. If not, return error message.                          
                             activity.save(function(err, activity) {
                                 if (err) {
@@ -314,9 +313,9 @@ router.post('/pulse', function(req, res, next) {
                                         return res.status(201).send(JSON.stringify(responseJson));
                                     });
                                 }
-                            });//end save activity
+                            }); //end save activity
                         }
-                    });//end request
+                    }); //end request
                 }
             } else {
                 responseJson.status = "ERROR";
@@ -325,7 +324,7 @@ router.post('/pulse', function(req, res, next) {
             }
         });
     }
-});//end callback hell
+}); //end callback hell
 
 //not needed
 router.get('/threshold', (req, res) => {
