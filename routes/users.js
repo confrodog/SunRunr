@@ -172,7 +172,7 @@ router.post('/register', function(req, res, next) {
                 email: req.body.email,
                 fullName: req.body.fullName,
                 passwordHash: hash,
-                uvThreshold: 999
+                uvThreshold: 6
             });
 
             newUser.save(function(err, user) {
