@@ -139,24 +139,49 @@ router.post('/pulse', function(req, res, next) {
                     return res.status(201).send(JSON.stringify(responseJson));
                 } else {
                     // Find activity by _id and add more locations to activity array                        
-                    Activity.findOneAndUpdate({ _id: req.body.activityId }, { $push: { activity: req.body.activity } }, function(err, activity) {
+                    Activity.findOne({ _id: req.body.activityId },(err, activity)=>{
                         if (err) {
                             responseJson.status = "ERROR";
-                            responseJson.message = "Error saving data in db.";
+                            responseJson.message = "Error saving data in db.1";
                             return res.status(201).send(JSON.stringify(responseJson));
-                        } else {
-                            //return uvThreshold and activity Id to photon
-                            User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
-                                //console.log(user);
-                                responseJson.uvThreshold = user.uvThreshold;
-                                responseJson.activityId = activity._id;
-                                responseJson.status = "OK";
-                                responseJson.message = "Activity "+ activity._id +" is in progress.";
-                                return res.status(201).send(JSON.stringify(responseJson));
-                            })
-
+                        }else{
+                            //concatenate activity
+                            activity.activity.concat(req.body.activity);
+                            activity.save((err,activity)=>{
+                                if(err){
+                                    responseJson.status = "ERROR";
+                                    responseJson.message = "Error saving data in db.2";
+                                    return res.status(201).send(JSON.stringify(responseJson));
+                                }else{
+                                    User.findOne({userDevices: req.body.deviceId}, (err,user)=>{
+                                        responseJson.uvThreshold = user.uvThreshold;
+                                        responseJson.activityId = activity._id;
+                                        responseJson.status = "OK";
+                                        responseJson.message = "Activity "+ activity._id +" is in progress.";
+                                        return res.status(201).send(JSON.stringify(responseJson));
+                                    });
+                                }
+                            });
                         }
                     });
+                    // Activity.findOneAndUpdate({ _id: req.body.activityId }, { $concatArrays: [ activity, req.body.activity ] }, function(err, activity) {
+                    //     if (err) {
+                    //         responseJson.status = "ERROR";
+                    //         responseJson.message = "Error saving data in db.";
+                    //         return res.status(201).send(JSON.stringify(responseJson));
+                    //     } else {
+                    //         //return uvThreshold and activity Id to photon
+                    //         User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                    //             //console.log(user);
+                    //             responseJson.uvThreshold = user.uvThreshold;
+                    //             responseJson.activityId = activity._id;
+                    //             responseJson.status = "OK";
+                    //             responseJson.message = "Activity "+ activity._id +" is in progress.";
+                    //             return res.status(201).send(JSON.stringify(responseJson));
+                    //         })
+
+                    //     }
+                    // });
                 }
             } else {
                 responseJson.status = "ERROR";
@@ -175,24 +200,30 @@ router.post('/pulse', function(req, res, next) {
                     responseJson.status = "ERROR";
                     responseJson.message = "Invalid apikey for device ID " + req.body.deviceId + ".";
                     return res.status(201).send(JSON.stringify(responseJson));
-                } else {
+                } 
+                else {
                     // find activity with given _id, add final activity locations and add began, ended values                          
-                    Activity.findOneAndUpdate({ _id: req.body.activityId }, {
-                            $push: { activity: req.body.activity },
-                            $set: { began: req.body.began, ended: req.body.ended }
-                        },
-                        function(err, activity) {
-                            if (err) {
-                                responseJson.status = "ERROR";
-                                responseJson.message = "Error saving data in db.";
-                                return res.status(201).send(JSON.stringify(responseJson));
-                            } else {
-                                //calculate avgUV and avgSpeed and add those fields
-                                let totalAct = activity.activity.concat(req.body.activity);
-                                let avgUV = calculateUVIndex(totalAct);
-                                let avgSpeed = calculateActivity(totalAct);
-                                activity.update({ $set: {activityType:avgSpeed[1],averageSpeed:avgSpeed[0],uvIndex:avgUV}},()=>{
-                                    //return uvThreshold and activity Id to photon
+                    Activity.findOne({ _id: req.body.activityId }, (err,activity)=>{
+                        if (err) {
+                            responseJson.status = "ERROR";
+                            responseJson.message = "Error saving data in db.";
+                            return res.status(201).send(JSON.stringify(responseJson));
+                        } else {
+                            activity.activity.concat(req.body.activity);
+                            let totalAct = activity.activity;
+                            //let totalAct = activity.activity.concat(req.body.activity);
+                            let avgUV = calculateUVIndex(totalAct);
+                            let avgSpeed = calculateActivity(totalAct);
+                            activity.activityType = avgSpeed[1];
+                            activity.averageSpeed = avgSpeed[0];
+                            activity.uvIndex = avgUV;
+                            activity.save((err,activity)=>{
+                                if(err){
+                                    responseJson.status = "ERROR";
+                                    responseJson.message = "Error saving data in db.3";
+                                    return res.status(201).send(JSON.stringify(responseJson));
+                                }
+                                else{
                                     User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
                                         responseJson.uvThreshold = user.uvThreshold;
                                         responseJson.activityId = activity._id;
@@ -200,10 +231,36 @@ router.post('/pulse', function(req, res, next) {
                                         responseJson.message = "Activity "+ activity._id +" has ended.";
                                         return res.status(201).send(JSON.stringify(responseJson));
                                     });
-                                })
-                                
-                            }
-                        });
+                                }
+                            })
+                        }
+                    });
+                    // Activity.findOneAndUpdate({ _id: req.body.activityId }, {
+                    //     $concatArrays: [ activity.activity, req.body.activity ] },{
+                    //         $set: { began: req.body.began, ended: req.body.ended }
+                    //     },
+                    //     function(err, activity) {
+                    //         if (err) {
+                    //             responseJson.status = "ERROR";
+                    //             responseJson.message = "Error saving data in db.";
+                    //             return res.status(201).send(JSON.stringify(responseJson));
+                    //         } else {
+                    //             //calculate avgUV and avgSpeed and add those fields
+                    //             let totalAct = activity.activity.concat(req.body.activity);
+                    //             let avgUV = calculateUVIndex(totalAct);
+                    //             let avgSpeed = calculateActivity(totalAct);
+                    //             activity.update({ $set: {activityType:avgSpeed[1],averageSpeed:avgSpeed[0],uvIndex:avgUV}},()=>{
+                    //                 //return uvThreshold and activity Id to photon
+                    //                 User.findOne({ userDevices: req.body.deviceId }, (err, user) => {
+                    //                     responseJson.uvThreshold = user.uvThreshold;
+                    //                     responseJson.activityId = activity._id;
+                    //                     responseJson.status = "OK";
+                    //                     responseJson.message = "Activity "+ activity._id +" has ended.";
+                    //                     return res.status(201).send(JSON.stringify(responseJson));
+                    //                 });
+                    //             })
+                    //         }
+                    // });
                 }
             } else {
                 responseJson.status = "ERROR";
@@ -237,7 +294,7 @@ router.post('/pulse', function(req, res, next) {
                                 began: req.body.began,
                                 ended: req.body.ended,
                                 activityType: actType[1],
-                                avgSpeed: actType[0],
+                                averageSpeed: actType[0],
                                 uvIndex: uvIndex,
                                 temp: weather.main.temp,
                                 humidity: weather.main.humidity

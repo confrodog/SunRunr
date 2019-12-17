@@ -15,6 +15,9 @@ function sendRegisterRequest() {
     $('#ServerResponse').show();
     validLogin = false;
   }
+  
+  //Check for email
+  let emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
   // Check for a strong password
   let passwordLowercaseRegex = /[a-z]+/;
@@ -22,10 +25,17 @@ function sendRegisterRequest() {
   let passwordDigitRegex = /\d+/;
   let passwordSpecCharRegex = /[!@#\$%\^&]+/;
 
+  let emailCheck = emailRegex.exec(email);
   let lowerCaseCheck = passwordLowercaseRegex.exec(password);
   let upperCaseCheck = passwordUppercaseRegex.exec(password);
   let digitCheck = passwordDigitRegex.exec(password);
   let specialCharacterCheck = passwordSpecCharRegex.exec(password);
+
+  if (emailCheck === null){
+	$('#ServerResponse').append("<div class='red-text text-darken-2'>Email is not a valid format.</div>");
+	$('#ServerResponse').show();
+	validLogin = false;
+  }
 
   if (password.length < 10) {
     $('#ServerResponse').append("<div class='red-text text-darken-2'>Password needs to be at least 10 characters long.</div>");
