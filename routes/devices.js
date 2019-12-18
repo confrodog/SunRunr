@@ -20,33 +20,6 @@ function getNewApikey() {
     return newApikey;
 }
 
-// GET request return one or "all" devices registered and last time of contact.
-//NOT used
-router.get('/status/:devid', function(req, res, next) {
-    let deviceId = req.params.devid;
-    let responseJson = { devices: [] };
-
-    if (deviceId == "all") {
-        let query = {};
-    } else {
-        let query = {
-            "deviceId": deviceId
-        };
-    }
-
-    Device.find(query, function(err, allDevices) {
-        if (err) {
-            let errorMsg = { "message": err };
-            res.status(400).json(errorMsg);
-        } else {
-            for (let doc of allDevices) {
-                responseJson.devices.push({ "deviceId": doc.deviceId, "lastContact": doc.lastContact });
-            }
-        }
-        res.status(200).json(responseJson);
-    });
-});
-
 //POST register new device
 router.post('/register', function(req, res, next) {
     let responseJson = {
@@ -119,7 +92,6 @@ router.post('/register', function(req, res, next) {
                             responseJson.deviceId = req.body.deviceId;
                             responseJson.message = "Device ID " + req.body.deviceId + " was registered and added to " + user.email + " list.";
                             return res.status(201).json(responseJson);
-
                         }
 
                     });
@@ -128,42 +100,6 @@ router.post('/register', function(req, res, next) {
             });
         }
     });
-});
-
-//NOT IMPLEMENTED
-router.post('/ping', function(req, res, next) {
-    let responseJson = {
-        success: false,
-        message: "",
-    };
-    let deviceExists = false;
-
-    // Ensure the request includes the deviceId parameter
-    if (!req.body.hasOwnProperty("deviceId")) {
-        responseJson.message = "Missing deviceId.";
-        return res.status(400).json(responseJson);
-    }
-
-    // If authToken provided, use email in authToken 
-    try {
-        let decodedToken = jwt.decode(req.headers["x-auth"], secret);
-    } catch (ex) {
-        responseJson.message = "Invalid authorization token.";
-        return res.status(400).json(responseJson);
-    }
-
-    request({
-        method: "POST",
-        uri: "https://api.particle.io/v1/devices/" + req.body.deviceId + "/pingDevice",
-        form: {
-            access_token: particleAccessToken,
-            args: "" + (Math.floor(Math.random() * 11) + 1)
-        }
-    });
-
-    responseJson.success = true;
-    responseJson.message = "Device ID " + req.body.deviceId + " pinged.";
-    return res.status(200).json(responseJson);
 });
 
 //DELETE device
