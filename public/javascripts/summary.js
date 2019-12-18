@@ -125,8 +125,8 @@ function sum7days(acts){
   var min = Math.floor(((sec % 86400) % 3600) / 60);
   var sec = ((sec % 86400) % 3600) % 60;
   var durstring = days != 0? days +":" + ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2):"";
-  durstring = durstring == "" && hours != 0? ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2):"";
-  durstring = durstring == ""? min + ' min ' + sec +' sec':"";
+  durstring = durstring == "" && hours != 0? ("0" + hours).slice(-2) + ':' + ("0" + min).slice(-2) + ':' + ("0" + sec).slice(-2):durstring;
+  durstring = durstring == ""? min + ' min ' + sec +' sec':durstring;
   
   
   $('#totactdur').html(durstring);
