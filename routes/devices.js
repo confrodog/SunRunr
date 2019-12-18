@@ -21,6 +21,7 @@ function getNewApikey() {
 }
 
 // GET request return one or "all" devices registered and last time of contact.
+//NOT used
 router.get('/status/:devid', function(req, res, next) {
     let deviceId = req.params.devid;
     let responseJson = { devices: [] };
@@ -46,6 +47,7 @@ router.get('/status/:devid', function(req, res, next) {
     });
 });
 
+//POST register new device
 router.post('/register', function(req, res, next) {
     let responseJson = {
         registered: false,
@@ -128,6 +130,7 @@ router.post('/register', function(req, res, next) {
     });
 });
 
+//NOT IMPLEMENTED
 router.post('/ping', function(req, res, next) {
     let responseJson = {
         success: false,
@@ -163,6 +166,7 @@ router.post('/ping', function(req, res, next) {
     return res.status(200).json(responseJson);
 });
 
+//DELETE device
 router.delete('/remove/:deviceId', (req, res) => {
     //console.log("deleting device...");
     //console.log(req.params);
